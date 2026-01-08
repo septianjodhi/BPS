@@ -1,0 +1,1477 @@
+<?php
+/*******************************************
+    Export Excel dengan PHPExcel
+******************************************/
+session_start();
+
+include "../koneksi.php";
+include "PHPExcel.php";
+
+date_default_timezone_set("Asia/Jakarta");
+$excelku = new PHPExcel();
+/*
+$sect_s= $_SESSION["area"]; 
+$akses_s=$_SESSION["akses"];
+$admin_FA_s=strpos($akses,'_FA');
+$kd_akses_s=explode(",",$akses);
+if(in_array('ADM_FA',$kd_akses_s)){
+	$adm_s="";
+}else{
+	$adm_s=" and sect='$sect_s'";
+} */
+
+$term_s=$_GET['t'];
+$sect_s=$_GET['s'];
+$term_sum=$term_s-1;
+$tahunnya=2023+($term_s-83);
+$tahunnya1=$tahunnya-1;
+//if($sec=="all" or $sec==""){$sect="" ;}else{$sect=" and a.sect='$sec' ";}
+if($sect_s=="ALL"){
+	$sec_s="" ;
+	$sec_sa="" ;
+	} else {
+		//$sect_s=" and sect='$sect_s' ";
+		$sec_s=" and sect='$sect_s' ";
+		$sec_sa=" and sect like '$sect_s%' ";
+		}
+$rev_s=$_GET['r'];
+$lokasi=$_GET['f'];
+$rev_s1="select max(revisi) as revisi from bps_budget_stp where term='$term_s'";
+$tb_rev=odbc_exec($koneksi_lp,$rev_s1);
+				while($baris1_rev=odbc_fetch_array($tb_rev)){
+					$rev_s=odbc_result($tb_rev,"revisi");
+				}
+				
+
+// Set properties
+$excelku->getProperties()->setCreator("PLAN BUDGET STP SAMI-".$lokasi)
+                         ->setLastModifiedBy("FA SAMI-JF");
+
+	
+// Set lebar kolom
+$excelku->getActiveSheet()->getColumnDimension('A')->setWidth(8.50);
+$excelku->getActiveSheet()->getColumnDimension('B')->setWidth(17.50);
+$excelku->getActiveSheet()->getColumnDimension('C')->setWidth(17.50);
+$excelku->getActiveSheet()->getColumnDimension('D')->setWidth(28.50);
+$excelku->getActiveSheet()->getColumnDimension('E')->setWidth(50);
+$excelku->getActiveSheet()->getColumnDimension('F')->setWidth(18.50);
+$excelku->getActiveSheet()->getColumnDimension('G')->setWidth(13);
+$excelku->getActiveSheet()->getColumnDimension('H')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('I')->setWidth(30);
+$excelku->getActiveSheet()->getColumnDimension('J')->setWidth(19);
+$excelku->getActiveSheet()->getColumnDimension('K')->setWidth(19);
+$excelku->getActiveSheet()->getColumnDimension('L')->setWidth(19);
+$excelku->getActiveSheet()->getColumnDimension('M')->setWidth(19);
+$excelku->getActiveSheet()->getColumnDimension('N')->setWidth(10);
+$excelku->getActiveSheet()->getColumnDimension('O')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('P')->setWidth(12);  // P SAMPAI BN 12
+$excelku->getActiveSheet()->getColumnDimension('Q')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('R')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('S')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('T')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('U')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('V')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('W')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('X')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('Y')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('Z')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AA')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AB')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AC')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AD')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AE')->setWidth(12); //add
+$excelku->getActiveSheet()->getColumnDimension('AF')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AG')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AH')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AI')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AJ')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AK')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AL')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AM')->setWidth(12); //add
+$excelku->getActiveSheet()->getColumnDimension('AN')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AO')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AP')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AQ')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AR')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AS')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AT')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AU')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AV')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AW')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AX')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('AY')->setWidth(12); //add
+$excelku->getActiveSheet()->getColumnDimension('AZ')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BA')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BB')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BC')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BD')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BE')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BF')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BG')->setWidth(12); 
+$excelku->getActiveSheet()->getColumnDimension('BH')->setWidth(12); //add
+$excelku->getActiveSheet()->getColumnDimension('BI')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BJ')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BK')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BL')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BM')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BN')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('BO')->setWidth(18);
+$excelku->getActiveSheet()->getColumnDimension('BP')->setWidth(18);
+$excelku->getActiveSheet()->getColumnDimension('BQ')->setWidth(18); //add
+
+$excelku->getActiveSheet()->getColumnDimension('BR')->setWidth(9);
+$excelku->getActiveSheet()->getColumnDimension('BS')->setWidth(9);
+$excelku->getActiveSheet()->getColumnDimension('BT')->setWidth(9);
+$excelku->getActiveSheet()->getColumnDimension('BU')->setWidth(9);
+$excelku->getActiveSheet()->getColumnDimension('BV')->setWidth(9);
+$excelku->getActiveSheet()->getColumnDimension('BW')->setWidth(9);
+$excelku->getActiveSheet()->getColumnDimension('BX')->setWidth(9);
+$excelku->getActiveSheet()->getColumnDimension('BY')->setWidth(9); //add
+$excelku->getActiveSheet()->getColumnDimension('BZ')->setWidth(9);
+
+//set tinggi row
+$excelku->getActiveSheet()->getRowDimension('11')->setrowHeight(30);
+$excelku->getActiveSheet()->getRowDimension('12')->setrowHeight(20.50);
+/* $excelku->getActiveSheet()->getRowDimension('2')->setrowHeight(67.50);
+$excelku->getActiveSheet()->getRowDimension('3')->setrowHeight(67.50);
+$excelku->getActiveSheet()->getRowDimension('4')->setrowHeight(67.50);
+$excelku->getActiveSheet()->getRowDimension('5')->setrowHeight(60);
+$excelku->getActiveSheet()->getRowDimension('6')->setrowHeight(82.50);
+$excelku->getActiveSheet()->getRowDimension('7')->setrowHeight(82.50);
+$excelku->getActiveSheet()->getRowDimension('8')->setrowHeight(123.75);
+$excelku->getActiveSheet()->getRowDimension('9')->setrowHeight(123.75);
+$excelku->getActiveSheet()->getRowDimension('10')->setrowHeight(114.75);
+*/
+
+// Mergecell, menyatukan beberapa kolom
+$excelku->getActiveSheet()->mergeCells('A10:A11');  
+$excelku->getActiveSheet()->mergeCells('B10:B11');  
+$excelku->getActiveSheet()->mergeCells('C10:C11');  
+$excelku->getActiveSheet()->mergeCells('D10:D11');  
+$excelku->getActiveSheet()->mergeCells('E10:E11');  
+$excelku->getActiveSheet()->mergeCells('F10:F11');  
+$excelku->getActiveSheet()->mergeCells('G10:G11');  
+$excelku->getActiveSheet()->mergeCells('H10:H11');  
+$excelku->getActiveSheet()->mergeCells('I10:I11');  
+$excelku->getActiveSheet()->mergeCells('J10:J11');  
+$excelku->getActiveSheet()->mergeCells('K10:K11');  
+$excelku->getActiveSheet()->mergeCells('L10:L11');  
+$excelku->getActiveSheet()->mergeCells('M10:M11');  
+$excelku->getActiveSheet()->mergeCells('N10:N11');  
+$excelku->getActiveSheet()->mergeCells('O10:O11');  
+$excelku->getActiveSheet()->mergeCells('P10:AA10');  
+$excelku->getActiveSheet()->mergeCells('AB10:AM10');  
+$excelku->getActiveSheet()->mergeCells('AZ10:AZ11');  
+$excelku->getActiveSheet()->mergeCells('BA10:BA11');  
+$excelku->getActiveSheet()->mergeCells('BO10:BO11');  
+$excelku->getActiveSheet()->mergeCells('BP10:BP11');  
+$excelku->getActiveSheet()->mergeCells('BR10:BR11');  
+$excelku->getActiveSheet()->mergeCells('BS10:BS11');  
+$excelku->getActiveSheet()->mergeCells('BT10:BT11');  
+$excelku->getActiveSheet()->mergeCells('BU10:BZ10');  
+
+
+//set zoom view
+//$excelku->getActiveSheet()->getSheetView()->setZoomScale(25);
+
+// Buat Kolom judul tabel
+$SI = $excelku->setActiveSheetIndex(0);
+$Jdl='PLAN BUDGET SAMI-'.$lokasi;
+
+$SI->setCellValue('A1', 'PT. SEMARANG AUTOCOMP MANUFACTURING INDONESIA'); 
+$SI->setCellValue('A2', 'BUDGET EXPENSE FORM'); 
+
+$SI->setCellValue('A4', 'DEPARTMENT-SECTION : '.$sect_s); //NANTI DIPINDAH KE VARIABEL SECTION
+$SI->setCellValue('N2', 'EXCHANGE RATE TO USD'); 
+/* $SI->setCellValue('N4', 'IDR'); 
+$SI->setCellValue('N5', 'JPY'); 
+$SI->setCellValue('N6', 'USD'); 
+$SI->setCellValue('N7', 'EUR'); 
+$SI->setCellValue('N8', 'CHF'); 
+$SI->setCellValue('N9', 'THB'); */
+
+$SI->setCellValue('A10', 'SECTION'); 
+$SI->setCellValue('B10', 'BUDGET REF NO'); 
+$SI->setCellValue('C10', 'PART_NO');
+$SI->setCellValue('D10', 'PART  NAME');
+$SI->setCellValue('E10', 'DETAIL PART');
+$SI->setCellValue('F10', 'FUNGSI / TUJUAN');
+$SI->setCellValue('G10', 'SECTION CATEGORY');
+$SI->setCellValue('H10', 'ACC NO.');
+$SI->setCellValue('I10', 'ACCOUNT DESCRIPTION');
+$SI->setCellValue('J10', 'CATEGORY');
+$SI->setCellValue('K10', 'COST CENTER');
+$SI->setCellValue('L10', 'CARLINE');
+$SI->setCellValue('M10', 'CARMAKER'); 
+$SI->setCellValue('N10', 'UOM'); 
+$SI->setCellValue('O10', 'ORG CURR'); 
+$SI->setCellValue('P10', 'PRICE ORG CURR'); 
+$SI->setCellValue('AB10', 'PRICE USD'); 
+/*
+$SI->setCellValue('P11'); 
+$SI->setCellValue('Q11');
+$SI->setCellValue('R11'); 
+$SI->setCellValue('S11'); 
+$SI->setCellValue('T11'); 
+$SI->setCellValue('U11'); 
+$SI->setCellValue('V11'); 
+$SI->setCellValue('W11'); 
+$SI->setCellValue('X11'); 
+$SI->setCellValue('Y11'); 
+$SI->setCellValue('Z11'); 	SET PRICE IDR AND USD RUMUS
+$SI->setCellValue('AA11'); 
+$SI->setCellValue('AB11'); 
+$SI->setCellValue('AC11'); 
+$SI->setCellValue('AD11'); 
+$SI->setCellValue('AE11'); 
+$SI->setCellValue('AF11'); 
+$SI->setCellValue('AG11'); 
+$SI->setCellValue('AH11'); 
+$SI->setCellValue('AI11'); 
+$SI->setCellValue('AJ11'); 
+$SI->setCellValue('AK11'); 
+$SI->setCellValue('AL11'); 
+$SI->setCellValue('AM11');  */ 
+
+$SI->setCellValue('AN11', 'QTY'); //QTY
+$SI->setCellValue('AO11', 'QTY'); //QTY
+$SI->setCellValue('AP11', 'QTY'); //QTY
+$SI->setCellValue('AQ11', 'QTY'); //QTY
+$SI->setCellValue('AR11', 'QTY'); //QTY
+$SI->setCellValue('AS11', 'QTY'); //QTY
+$SI->setCellValue('AT11', 'QTY'); //QTY
+$SI->setCellValue('AU11', 'QTY'); //QTY
+$SI->setCellValue('AV11', 'QTY'); //QTY
+$SI->setCellValue('AW11', 'QTY'); //QTY
+$SI->setCellValue('AX11', 'QTY'); //QTY
+$SI->setCellValue('AY11', 'QTY'); //QTY
+
+$SI->setCellValue('AZ10', 'TOTAL'); 
+$SI->setCellValue('BA10', 'AVERAGE'); 
+$SI->setCellValue('BB10'); // KOSONG
+$SI->setCellValue('BC11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BD11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BE11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BF11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BG11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BH11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BI11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BJ11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BK11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BL11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BM11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BN11', 'AMT'); //AMOUNT USD
+$SI->setCellValue('BO10', 'TOTAL'); //TOTAL AMOUNT USD
+$SI->setCellValue('BP10', 'AVERAGE'); //AVERAGE AMOUNT USD
+ 
+$SI->setCellValue('BQ10'); //KOSONG
+$SI->setCellValue('BR10', 'SUB ACCOUNT'); 
+$SI->setCellValue('BS10', 'KODE PROSES'); 
+$SI->setCellValue('BT10', 'PURCHASING'); 
+$SI->setCellValue('BU10', 'LEADTIME');
+$SI->setCellValue('BU11', 'PENAWARAN'); 
+$SI->setCellValue('BV11', 'PR'); 
+$SI->setCellValue('BW11', 'PO'); 
+$SI->setCellValue('BX11', 'KEDATANGAN'); 
+$SI->setCellValue('BY11', 'VP'); 
+$SI->setCellValue('BZ11'); 
+
+// set format
+//$SI->getStyle('A10:BQ11')->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_DATE_MYMINUS);
+//SET style
+$SI->getStyle('BR10:BZ11')->getAlignment()->setWrapText(true);
+$SI->getStyle('G10')->getAlignment()->setWrapText(true);
+$SI->getStyle('BR10:BZ11')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$SI->getStyle('BR10:BZ11')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER); 
+$SI->getStyle('A10:BQ11')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$SI->getStyle('A10:BQ11')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+//set style font
+$SI->getStyle('A1:A5')->getFont()->setBold(true)->setName('Calibri')->setSize(10)->getColor()->setRGB('000000');
+$SI->getStyle('P11:AM11')->getFont()->setBold(true)->setName('Calibri')->setSize(10)->getColor()->setRGB('000000');
+$SI->getStyle('A10:BQ11')->getFont()->setBold(true)->setName('Calibri')->setSize(10)->getColor()->setRGB('000000');
+$SI->getStyle('N2:O8')->getFont()->setBold(false)->setName('Calibri')->setSize(10)->getColor()->setRGB('000000');
+
+//set fill
+$SI->getStyle('A10:BA11')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('ffff00');
+$SI->getStyle('BC10:BQ11')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('ffff00');
+$SI->getStyle('N2:O8')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('92CDDC');
+
+ $alphabet = array( 'A', 'B', 'C', 'D', 'E',
+                       'F', 'G', 'H', 'I', 'J',
+                       'K', 'L', 'M', 'N', 'O',
+                       'P', 'Q', 'R', 'S', 'T',
+                       'U', 'V', 'W', 'X', 'Y',
+                       'Z',
+					   'AA', 'AB', 'AC', 'AD', 'AE',
+                       'AF', 'AG', 'AH', 'AI', 'AJ',
+                       'AK', 'AL', 'AM', 'AN', 'AO',
+                       'AP', 'AQ', 'AR', 'AS', 'AT',
+                       'AU', 'AV', 'AW', 'AX', 'AY',
+                       'AZ',
+					   'BA', 'BB', 'BC', 'BD', 'BE',
+                       'BF', 'BG', 'BH', 'BI', 'BJ',
+                       'BK', 'BL', 'BM', 'BN', 'BO',
+                       'BP', 'BQ', 'BR', 'BS', 'BT',
+                       'BU', 'BV', 'BW', 'BX', 'BY',
+                       'BZ',
+					   'CA', 'CB', 'CC', 'CD', 'CE',
+                       'CF', 'CG', 'CH', 'CI', 'CJ',
+                       'CK', 'CL', 'CM', 'CN', 'CO',
+                       'CP', 'CQ', 'CR', 'CS', 'CT',
+                       'CU', 'CV', 'CW', 'CX', 'CY',
+                       'CZ',
+					   'DA', 'DB', 'DC', 'DD', 'DE',
+                       'DF', 'DG', 'DH', 'DI', 'DJ',
+                       'DK', 'DL', 'DM', 'DN', 'DO',
+                       'DP', 'DQ', 'DR', 'DS', 'DT',
+                       'DU', 'DV', 'DW', 'DX', 'DY',
+                       'DZ',
+					   'EA', 'EB', 'EC', 'ED', 'EE',
+                       'EF', 'EG', 'EH', 'EI', 'EJ',
+                       'EK', 'EL', 'EM', 'EN', 'EO',
+                       'EP', 'EQ', 'ER', 'ES', 'ET',
+                       'EU', 'EV', 'EW', 'EX', 'EY',
+                       'EZ',
+					   'FA', 'FB', 'FC', 'FD', 'FE',
+                       'FF', 'FG', 'FH', 'FI', 'FJ',
+                       'FK', 'FL', 'FM', 'FN', 'FO',
+                       'FP', 'FQ', 'FR', 'FS', 'FT',
+                       'FU', 'FV', 'FW', 'FX', 'FY',
+                       'FZ'
+                       );
+					   
+					   
+$tgl31=$tahunnya."-07-01";
+$column=15;
+
+$bariscolp=11;
+						
+						for($ii=0;$ii<=11;$ii++){
+							$tglnya2=date("Ym",strtotime($tgl31."+$ii month"));
+							$SI->setCellValueByColumnAndRow($column,$bariscolp,$tglnya2);
+							$SI->setCellValueByColumnAndRow($column+12,$bariscolp,$tglnya2);
+							$SI->setCellValueByColumnAndRow($column+24,$bariscolp-1,$tglnya2);
+							$SI->setCellValueByColumnAndRow($column+39,$bariscolp-1,$tglnya2);
+							
+							$column++;
+						}
+						
+						
+$SI->setCellValue('A3', 'PERIODE ' .date("M-y",strtotime($tgl31)). ' SD ' .date("M-y",strtotime($tgl31."+11 month")) ); //NANTI DIPINDAH KE VARIABEL 
+$tglnyacPRICE="";
+$cari="";
+for($ii=0;$ii<=11;$ii++){
+	$tglnya2=date("Ym",strtotime($tgl31."+$ii month"));
+		if($tglnyacPRICE==""){
+			
+			$tglnyacPRICE="[".$tglnya2."PRICE]";
+			$tglnyacPRICEUSD="[".$tglnya2."PRICEUSD]";
+			$tglnyacQTY="[".$tglnya2."QTY]";
+			$tglnyacAMT="[".$tglnya2."AMT]";
+			
+		}else{
+			$tglnyacPRICE=$tglnyacPRICE.",[".$tglnya2."PRICE]";
+			$tglnyacPRICEUSD=$tglnyacPRICEUSD.",[".$tglnya2."PRICEUSD]";
+			$tglnyacQTY=$tglnyacQTY.",[".$tglnya2."QTY]";
+			$tglnyacAMT=$tglnyacAMT.",[".$tglnya2."AMT]";
+			
+		}
+		$cari=$cari.",MAX([".$tglnya2."PRICE]) AS [".$tglnya2."PRICE],MAX([".$tglnya2."PRICEUSD]) AS  [".$tglnya2."PRICEUSD],MAX([".$tglnya2."QTY]) AS  [".$tglnya2."QTY],MAX([".$tglnya2."AMT]) AS  [".$tglnya2."AMT] ";
+	}
+
+$Qry1="select distinct  sect,part_no,part_dtl,uom,term,id_proses,jns_budget,lp,kurs,curr,phase,cccode,part_nm,revisi,fungsi,carline,carmaker,sub_acc,lt_vp,lt_datang,lt_po,lt_pr,lt_Quo,urut$cari from
+ (
+ select sect,part_no,part_dtl,uom,term,id_proses,jns_budget,lp,kurs,curr,phase,cccode,part_nm,revisi,fungsi,carline,carmaker,sub_acc,lt_vp,lt_datang,lt_po,lt_pr,lt_Quo,urut,convert(nvarchar(20),periode)+'PRICE' as periodeA,convert(nvarchar(20),periode)+'PRICEUSD' as periodeB,
+convert(nvarchar(20),periode)+'QTY' as periodeC,convert(nvarchar(20),periode)+'AMT' as periodeD,sum(price) as price,sum(price/kurs) as priceUSD,sum(qty) as qty,SUM(qty*price/kurs) as amt
+from bps_budget_stp where term='84' and revisi='1' group by sect,part_no,part_dtl,uom,term,id_proses,jns_budget,lp,kurs,curr,phase,cccode,part_nm,revisi,fungsi,carline,carmaker,sub_acc,lt_vp,lt_datang,lt_po,lt_pr,lt_Quo,urut,periode
+) t
+PIVOT(
+SUM(price)
+FOR periodeA IN 
+( ".$tglnyacPRICE.")
+) as pivot_price
+
+PIVOT(
+SUM(priceUSD)
+FOR periodeB IN 
+( ".$tglnyacPRICEUSD.")
+) as pivot_priceusd
+
+PIVOT(
+SUM(QTY)
+FOR periodeC IN 
+( ".$tglnyacQTY.")
+) as pivot_qty
+
+PIVOT(
+SUM(amt)
+FOR periodeD IN 
+( ".$tglnyacAMT.")
+) as pivot_amt
+
+ where term='$term_s' $sec_s and revisi='$rev_s' 
+ 
+group by sect,part_no,part_dtl,uom,term,id_proses,jns_budget,lp,kurs,curr,phase,cccode,part_nm,revisi,fungsi,carline,carmaker,sub_acc,lt_vp,lt_datang,lt_po,lt_pr,lt_Quo,urut ORDER BY sect,urut
+";
+
+$baris  = 13; //Ini untuk dimulai baris datanya
+
+		$tb_part=odbc_exec($koneksi_lp,$Qry1);
+
+		$row=0;
+		$row2=0;
+
+				while($baris1=odbc_fetch_array($tb_part)){
+					$row++;
+					
+						$sect=odbc_result($tb_part,"sect");
+						$part_no=odbc_result($tb_part,"part_no");
+						$part_nm=odbc_result($tb_part,"part_nm");
+						$part_dtl=odbc_result($tb_part,"part_dtl");
+						$fungsi=odbc_result($tb_part,"fungsi");
+						$sub_acc=odbc_result($tb_part,"sub_acc");
+						$category=odbc_result($tb_part,"phase");
+						$cccode=odbc_result($tb_part,"cccode"); 
+						$carline=odbc_result($tb_part,"carline");
+						$carmaker=odbc_result($tb_part,"carmaker");
+						$uom=odbc_result($tb_part,"uom");
+						$curr=odbc_result($tb_part,"curr");
+						$term_s=odbc_result($tb_part,"term");
+						$k_proses=odbc_result($tb_part,"id_proses");
+						$lt_vp=odbc_result($tb_part,"lt_vp");
+						$lt_datang=odbc_result($tb_part,"lt_datang");
+						$lt_po=odbc_result($tb_part,"lt_po");
+						$lt_pr=odbc_result($tb_part,"lt_pr");
+						$lt_quo=odbc_result($tb_part,"lt_quo");
+						$lp=odbc_result($tb_part,"lp");
+						
+						$SI->setCellValueByColumnAndRow(0,$baris,$sect);
+						$SI->setCellValueByColumnAndRow(2,$baris,$part_no); 
+						$SI->setCellValueByColumnAndRow(3,$baris,$part_nm); 
+						$SI->setCellValueByColumnAndRow(4,$baris,$part_dtl); 
+						$SI->setCellValueByColumnAndRow(5,$baris,$fungsi); 
+						$SI->setCellValueByColumnAndRow(6,$baris,$sub_acc); 
+						$SI->setCellValueByColumnAndRow(9,$baris,$category); 
+						$SI->setCellValueByColumnAndRow(10,$baris,$cccode); 
+						$SI->setCellValueByColumnAndRow(11,$baris,$carline); 
+						$SI->setCellValueByColumnAndRow(12,$baris,$carmaker); 
+						$SI->setCellValueByColumnAndRow(13,$baris,$uom); 
+						$SI->setCellValueByColumnAndRow(14,$baris,$curr);
+						$SI->setCellValueByColumnAndRow(70,$baris,$k_proses);
+						$SI->setCellValueByColumnAndRow(71,$baris,$lp);
+						$SI->setCellValueByColumnAndRow(72,$baris,$lt_quo);
+						$SI->setCellValueByColumnAndRow(73,$baris,$lt_pr);
+						$SI->setCellValueByColumnAndRow(74,$baris,$lt_po);
+						$SI->setCellValueByColumnAndRow(75,$baris,$lt_datang);
+						$SI->setCellValueByColumnAndRow(76,$baris,$lt_vp);
+						
+					
+						$bariscol=13;
+						$column1=15;
+						
+												for($i=0;$i<=11;$i++){
+												
+												
+												$tglnyaPRICE=date("Ym",strtotime($tgl31."+$i month"))."PRICE";
+												$tglnyaPRICEUSD=date("Ym",strtotime($tgl31."+$i month"))."PRICEUSD";
+												$tglnyaQTY=date("Ym",strtotime($tgl31."+$i month"))."QTY";
+												$tglnyaAMT=date("Ym",strtotime($tgl31."+$i month"))."AMT";
+												
+												$price=odbc_result($tb_part,$tglnyaPRICE);
+												$priceusd=odbc_result($tb_part,$tglnyaPRICEUSD);
+												$qty=odbc_result($tb_part,$tglnyaQTY);
+												$amt=odbc_result($tb_part,$tglnyaAMT);
+												
+												if($price==""){
+													$price=0;
+												}
+												if($priceusd==""){
+													$priceusd=0;
+												}
+												if($qty==""){
+													$qty=0;
+												}
+												
+												if($amt==""){
+													$amt=0;
+												}
+			
+												$SI->setCellValueByColumnAndRow($column1,$baris,$price);
+												$SI->setCellValueByColumnAndRow($column1+12,$baris,$priceusd);
+												$SI->setCellValueByColumnAndRow($column1+24,$baris,$qty);
+												$SI->setCellValueByColumnAndRow($column1+25,$baris,"=SUM(AN".$baris.":AY".$baris.")");
+												$SI->setCellValueByColumnAndRow($column1+26,$baris,"=AZ".$baris."/12");
+												$SI->setCellValueByColumnAndRow($column1+39,$baris,$amt);
+												$SI->setCellValueByColumnAndRow($column1+40,$baris,"=SUM(BC".$baris.":BN".$baris.")");
+												$SI->setCellValueByColumnAndRow($column1+41,$baris,"=BO".$baris."/12");
+									
+																							
+												
+												$column1++;
+											}
+						
+					
+						$SI->getStyle('A10:BA'.$baris)->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+						$SI->getStyle('BC10:BZ'.$baris)->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+
+						$SI->getStyle('AB13:AM'.$baris)->getNumberFormat()->setFormatCode('#,##0.00'); 
+						$SI->getStyle('AN13:AY'.$baris)->getNumberFormat()->setFormatCode('_(* #,##0_);_(* (#,##0);_(* "-"??_);_(@_)');
+						$SI->getStyle('BA13:BA'.$baris)->getNumberFormat()->setFormatCode('#,##0'); 
+						$SI->getStyle('BC13:BP'.$baris)->getNumberFormat()->setFormatCode('_(* #,##0.0_);_(* (#,##0.0);_(* "-"??_);_(@_)'); 
+
+
+						$baris++;
+											
+				}
+				
+
+
+$baris11  = 3;
+
+$qry_kurs= "select distinct kurs_code,kurs,term from bps_kurs where term='$term_s' order by kurs desc";
+//$tb_kurs=odbc_exec($koneksi_lp,"select * from bps_kurs where term='$term_s' order by kurs desc");
+$tb_kurs=odbc_exec($koneksi_lp,$qry_kurs);
+$row1=0;
+		while($barisss=odbc_fetch_array($tb_kurs)){
+			$row1++;
+			$SI->setCellValueByColumnAndRow(13,$baris11,strtoupper(odbc_result($tb_kurs,"kurs_code"))); 
+			$SI->setCellValueByColumnAndRow(14,$baris11,odbc_result($tb_kurs,"kurs"));
+			
+			$SI->getStyle('N2:O8')->getNumberFormat()->setFormatCode('_ * #,##0.00_ ;_ * -#,##0.00_ ;_ * "-"_ ;_ @_ '); 
+			
+		$baris11++;	
+		}
+			
+
+	
+
+
+//Memberi nama sheet
+$excelku->getActiveSheet()->setTitle($Jdl);
+$excelku->getActiveSheet()->getSheetView()->setZoomScale(70);
+$excelku->setActiveSheetIndex(0);
+
+
+// MULAI MEMBUAT SHEET KE 2 ( SUMMARY )
+$excelku->CreateSheet(); //harus setelah default sheet 0
+
+$excelku->setActiveSheetIndex();
+$S2 = $excelku->setActiveSheetIndex(1);
+$Jdl2='SUMMARY';
+
+// Set lebar kolom
+$excelku->getActiveSheet(1)->getColumnDimension('A')->setWidth(14.50);
+$excelku->getActiveSheet(1)->getColumnDimension('B')->setWidth(10.50);
+$excelku->getActiveSheet(1)->getColumnDimension('C')->setWidth(30.25);
+$excelku->getActiveSheet(1)->getColumnDimension('D')->setWidth(40);
+$excelku->getActiveSheet(1)->getColumnDimension('E')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('F')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('G')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('H')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('I')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('J')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('K')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('L')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('M')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('N')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('O')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('P')->setWidth(12);  // P SAMPAI BN 12
+$excelku->getActiveSheet(1)->getColumnDimension('Q')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('R')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('S')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('T')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('U')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('V')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('W')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('X')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('Y')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('Z')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('AA')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('AB')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('AC')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('AD')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('AE')->setWidth(12); //add
+$excelku->getActiveSheet(1)->getColumnDimension('AF')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('AG')->setWidth(12);
+$excelku->getActiveSheet(1)->getColumnDimension('AH')->setWidth(17);
+$excelku->getActiveSheet(1)->getColumnDimension('AI')->setWidth(17);
+$excelku->getActiveSheet(1)->getColumnDimension('AJ')->setWidth(88);
+
+$excelku->getActiveSheet(1)->getColumnDimension('B')->setVisible(false);
+$excelku->getActiveSheet(1)->getColumnDimension('C')->setVisible(false);
+
+// Mergecell, menyatukan beberapa kolom
+$excelku->getActiveSheet(1)->mergeCells('AC7:AD7');  
+$excelku->getActiveSheet(1)->mergeCells('AF7:AJ7'); 
+
+//SET fill
+$S2->getStyle('E7:P8')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('ff66cc');
+$S2->getStyle('Q7:AB8')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('ffff00');
+$S2->getStyle('AC7:AD7')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('92d050');
+$S2->getStyle('AF7:AJ7')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('92d050');
+
+//set style font
+$S2->getStyle('A8:AJ8')->getFont()->setBold(true)->setName('Calibri')->setSize(11)->getColor()->setRGB('000000');
+
+//SET STYLE
+$S2->getStyle('A7:AJ8')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$S2->getStyle('A7:AJ8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+//$S2->setCellValue('A2', $term_sum );
+$S2->setCellValue('A8', 'CATEGORY'); 
+$S2->setCellValue('B8', 'ACC NO'); 
+$S2->setCellValue('C8', 'ACC DESCRIPTION'); //NANTI DIPINDAH KE VARIABEL SECTION
+$S2->setCellValue('D8', 'PART NAME'); 
+$S2->setCellValue('E7', 'STP QTY'); 
+$S2->setCellValue('F7', 'STP QTY'); 
+$S2->setCellValue('G7', 'STP QTY'); 
+$S2->setCellValue('H7', 'STP QTY'); 
+$S2->setCellValue('I7', 'STP QTY'); 
+$S2->setCellValue('J7', 'STP QTY'); 
+$S2->setCellValue('K7', 'STP QTY'); 
+$S2->setCellValue('L7', 'STP QTY'); 
+$S2->setCellValue('M7', 'STP QTY'); 
+$S2->setCellValue('N7', 'STP QTY'); 
+$S2->setCellValue('O7', 'STP QTY'); 
+$S2->setCellValue('P7', 'STP QTY'); 
+$S2->setCellValue('Q7', 'STP AMT'); 
+$S2->setCellValue('R7', 'STP AMT'); 
+$S2->setCellValue('S7', 'STP AMT'); 
+$S2->setCellValue('T7', 'STP AMT'); 
+$S2->setCellValue('U7', 'STP AMT'); 
+$S2->setCellValue('V7', 'STP AMT'); 
+$S2->setCellValue('W7', 'STP AMT'); 
+$S2->setCellValue('X7', 'STP AMT'); 
+$S2->setCellValue('Y7', 'STP AMT'); 
+$S2->setCellValue('Z7', 'STP AMT'); 
+$S2->setCellValue('AA7', 'STP AMT'); 
+$S2->setCellValue('AB7', 'STP AMT'); 
+$S2->setCellValue('AC7', 'TERM '.$term_s); 
+$S2->setCellValue('AF7', 'TERM '.$term_sum); 
+$S2->setCellValue('AC8', 'TOTAL QTY'); 
+$S2->setCellValue('AD8', 'TOTAL AMT'); 
+$S2->setCellValue('AF8', 'TOTAL QTY'); 
+$S2->setCellValue('AG8', 'TOTAL AMT'); 
+$S2->setCellValue('AH8', 'PERCENTAGE QTY'); 
+$S2->setCellValue('AI8', 'PERCENTAGE AMT'); 
+$S2->setCellValue('AJ8', 'REMARKS'); 
+	$bariscolp=8;
+	
+	$column=4;
+					for($ii=0;$ii<=11;$ii++){
+							$tglnya2=date("M-y",strtotime($tgl31."+$ii month"));
+							$S2->setCellValueByColumnAndRow($column,$bariscolp,$tglnya2);
+							$S2->setCellValueByColumnAndRow($column+12,$bariscolp,$tglnya2);
+							
+							$column++;
+						}
+						
+$Qry2="select distinct phase,part_nm,remark,urut,ISNULL((select sum(qty) from bps_budget_stp_act where phase=a.phase and part_nm=a.part_nm and term='$term_sum' $sec_sa),0) as qty,ISNULL((select sum(price) from bps_budget_stp_act where phase=a.phase and part_nm=a.part_nm and term='$term_sum' $sec_sa),0) as price from bps_budget_stp a where term='$term_s' $sec_s and revisi='$rev_s' order by urut asc";	
+if($sect_s==""){
+	$Qry2="select distinct phase,part_nm,urut,ISNULL((select sum(qty) from bps_budget_stp_act where phase=a.phase and part_nm=a.part_nm and term='$term_sum' $sec_sa),0) as qty,ISNULL((select sum(price) from bps_budget_stp_act where phase=a.phase and part_nm=a.part_nm and term='$term_sum' $sec_sa),0) as price from bps_budget_stp a where term='$term_s' $sec_s and revisi='$rev_s' order by urut asc";
+}		
+
+$baris_s  = 9; //Ini untuk dimulai baris datanya
+
+		$tb_part_s=odbc_exec($koneksi_lp,$Qry2);
+
+		$row_s=0;
+		$column=4;
+				while($baris1_s=odbc_fetch_array($tb_part_s)){
+				$row_s++;
+				
+		
+				$part_nm=odbc_result($tb_part_s,"part_nm");
+				$category=odbc_result($tb_part_s,"phase");
+				
+					$S2->setCellValueByColumnAndRow(0,$baris_s,odbc_result($tb_part_s,"phase"));					
+					$S2->setCellValueByColumnAndRow(3,$baris_s,odbc_result($tb_part_s,"part_nm"));	
+					$S2->setCellValueByColumnAndRow(31,$baris_s,odbc_result($tb_part_s,"qty")); 			
+					$S2->setCellValueByColumnAndRow(32,$baris_s,odbc_result($tb_part_s,"price")); 	
+										
+					if($sect_s!=""){
+						$S2->setCellValueByColumnAndRow(35,$baris_s,odbc_result($tb_part_s,"remark"));	
+					}	
+							
+					
+					for($ii=0;$ii<=11;$ii++){
+						$S2->setCellValueByColumnAndRow($column+$ii,$baris_s,"=SUMIFS('".$Jdl."'!".$alphabet[$ii+39]."13:".$alphabet[$ii+39]."100000,'".$Jdl."'!D13:D100000,SUMMARY!D".$baris_s.",'".$Jdl."'!J13:J100000,SUMMARY!A".$baris_s.")");
+						$S2->setCellValueByColumnAndRow($column+$ii+12,$baris_s,"=SUMIFS('".$Jdl."'!".$alphabet[$ii+54]."13:".$alphabet[$ii+54]."100000,'".$Jdl."'!D13:D100000,SUMMARY!D".$baris_s.",'".$Jdl."'!J13:J100000,SUMMARY!A".$baris_s.")");
+						$S2->setCellValueByColumnAndRow($column+$ii+13,$baris_s,"=SUM(E".$baris_s.":P".$baris_s.")");
+						$S2->setCellValueByColumnAndRow($column+$ii+14,$baris_s,"=SUM(Q".$baris_s.":AB".$baris_s.")");				
+					}
+					
+					
+										
+								
+										
+					
+					
+					$S2->setCellValueByColumnAndRow(33,$baris_s,"=IFERROR((AC".$baris_s."-AF".$baris_s.")/AF".$baris_s.",1)");
+					$S2->setCellValueByColumnAndRow(34,$baris_s,"=IFERROR((AD".$baris_s."-AG".$baris_s.")/AG".$baris_s.",1)");
+
+					
+
+
+					$S2->getStyle('AH9:AI'.$baris_s)->getNumberFormat()->applyFromArray( 
+							array( 
+								'code' => PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE_00
+							)
+						);
+
+					$S2->getStyle('E9:AG'.$baris_s)->getNumberFormat()->setFormatCode('_(* #,##0_);_(* (#,##0);_(* "-"??_);_(@_)'); 
+
+					$S2->getStyle('A8:AD'.$baris_s)->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+					$S2->getStyle('AF8:AJ'.$baris_s)->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+				$baris_s++;
+			}	
+			
+			$Qry2="select distinct phase,part_nm,sum(qty) as qty,sum(price) as price from bps_budget_stp_act a where term='$term_sum' $sec_sa and not exists (select part_nm from bps_budget_stp where term='$term_s' and phase=a.phase and part_nm=a.part_nm) group by part_nm,phase";	
+
+			$tb_part_s=odbc_exec($koneksi_lp,$Qry2);
+
+		$row_s=0;
+		$column=4;
+				while($baris1_s=odbc_fetch_array($tb_part_s)){
+				$row_s++;
+				
+		
+				$part_nm=odbc_result($tb_part_s,"part_nm");
+				$category=odbc_result($tb_part_s,"phase");
+				
+					$S2->setCellValueByColumnAndRow(0,$baris_s,odbc_result($tb_part_s,"phase"));					
+					$S2->setCellValueByColumnAndRow(3,$baris_s,odbc_result($tb_part_s,"part_nm"));	
+					$S2->setCellValueByColumnAndRow(31,$baris_s,odbc_result($tb_part_s,"qty")); 			
+					$S2->setCellValueByColumnAndRow(32,$baris_s,odbc_result($tb_part_s,"price")); 	
+					
+					$S2->setCellValueByColumnAndRow(35,$baris_s,"Budget di Term $term_s tidak ada, sedangkan di Term $term_sum ada.");	
+					
+					for($ii=0;$ii<=11;$ii++){
+						$S2->setCellValueByColumnAndRow($column+$ii,$baris_s,"=SUMIFS('".$Jdl."'!".$alphabet[$ii+39]."13:".$alphabet[$ii+39]."100000,'".$Jdl."'!D13:D100000,SUMMARY!D".$baris_s.",'".$Jdl."'!J13:J100000,SUMMARY!A".$baris_s.")");
+						$S2->setCellValueByColumnAndRow($column+$ii+12,$baris_s,"=SUMIFS('".$Jdl."'!".$alphabet[$ii+54]."13:".$alphabet[$ii+54]."100000,'".$Jdl."'!D13:D100000,SUMMARY!D".$baris_s.",'".$Jdl."'!J13:J100000,SUMMARY!A".$baris_s.")");
+						$S2->setCellValueByColumnAndRow($column+$ii+13,$baris_s,"=SUM(E".$baris_s.":P".$baris_s.")");
+						$S2->setCellValueByColumnAndRow($column+$ii+14,$baris_s,"=SUM(Q".$baris_s.":AB".$baris_s.")");				
+					}
+					
+					
+										
+								
+										
+					
+					
+					$S2->setCellValueByColumnAndRow(33,$baris_s,"=IFERROR((AC".$baris_s."-AF".$baris_s.")/AF".$baris_s.",1)");
+					$S2->setCellValueByColumnAndRow(34,$baris_s,"=IFERROR((AD".$baris_s."-AG".$baris_s.")/AG".$baris_s.",1)");
+
+					
+
+
+					$S2->getStyle('AH9:AI'.$baris_s)->getNumberFormat()->applyFromArray( 
+							array( 
+								'code' => PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE_00
+							)
+						);
+
+					$S2->getStyle('E9:AG'.$baris_s)->getNumberFormat()->setFormatCode('_(* #,##0_);_(* (#,##0);_(* "-"??_);_(@_)'); 
+
+					$S2->getStyle('A8:AD'.$baris_s)->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+					$S2->getStyle('AF8:AJ'.$baris_s)->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+					$baris_s++;
+				
+				}
+	
+// Rename 2nd sheet
+$excelku->getActiveSheet(1)->setTitle($Jdl2);
+
+//$excelku->getActiveSheet(1)->getSheetView()->setZoomScale(70);
+
+
+// MULAI MEMBUAT SHEET KE 3 ( ANALYSIS )
+$excelku->CreateSheet(); //harus setelah default sheet 0
+
+$excelku->setActiveSheetIndex();
+$S3 = $excelku->setActiveSheetIndex(2);
+$Jdl3='ANALYSIS';
+
+
+// Set lebar kolom
+$excelku->getActiveSheet(2)->getColumnDimension('A')->setWidth(12.5);
+$excelku->getActiveSheet(2)->getColumnDimension('B')->setWidth(42.5);
+$excelku->getActiveSheet(2)->getColumnDimension('C')->setWidth(4.5);
+$excelku->getActiveSheet(2)->getColumnDimension('D')->setWidth(14.5);
+$excelku->getActiveSheet(2)->getColumnDimension('E')->setWidth(14.5);
+$excelku->getActiveSheet(2)->getColumnDimension('F')->setWidth(14.5);
+$excelku->getActiveSheet(2)->getColumnDimension('G')->setWidth(14.5);
+$excelku->getActiveSheet(2)->getColumnDimension('H')->setWidth(14.5);
+$excelku->getActiveSheet(2)->getColumnDimension('I')->setWidth(14.5);
+$excelku->getActiveSheet(2)->getColumnDimension('J')->setWidth(14.5);
+$excelku->getActiveSheet(2)->getColumnDimension('K')->setWidth(14.5);
+$excelku->getActiveSheet(2)->getColumnDimension('L')->setWidth(60.5);
+$excelku->getActiveSheet(2)->getColumnDimension('M')->setWidth(12.5);
+
+//set tinggi row
+$excelku->getActiveSheet(2)->getRowDimension('1')->setrowHeight(16.25);
+$excelku->getActiveSheet(2)->getRowDimension('2')->setrowHeight(16.25);
+$excelku->getActiveSheet(2)->getRowDimension('3')->setrowHeight(16.25);
+$excelku->getActiveSheet(2)->getRowDimension('4')->setrowHeight(16.25);
+$excelku->getActiveSheet(2)->getRowDimension('5')->setrowHeight(16.25);
+$excelku->getActiveSheet(2)->getRowDimension('6')->setrowHeight(16.25);
+$excelku->getActiveSheet(2)->getRowDimension('13')->setrowHeight(7.50);
+
+// Mergecell, menyatukan beberapa kolom
+$excelku->getActiveSheet(2)->mergeCells('I2:I4');  
+$excelku->getActiveSheet(2)->mergeCells('J2:J4');  
+$excelku->getActiveSheet(2)->mergeCells('K2:K4');  
+$excelku->getActiveSheet(2)->mergeCells('B7:B10');  
+$excelku->getActiveSheet(2)->mergeCells('C7:C10');  
+$excelku->getActiveSheet(2)->mergeCells('F7:J7');  
+$excelku->getActiveSheet(2)->mergeCells('K7:K9');  
+$excelku->getActiveSheet(2)->mergeCells('L7:L10');  
+
+//SET fill
+$S3->getStyle('C1:D2')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('ccffff');
+$S3->getStyle('C7')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('ccffff');
+$S3->getStyle('B11:L12')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('9bc2e6');
+
+//set style font
+$S3->getStyle('B1:B3')->getFont()->setBold(true)->setName('Calibri')->setSize(11)->getColor()->setRGB('000000');
+$S3->getStyle('B7:L12')->getFont()->setBold(true)->setName('Calibri')->setSize(11)->getColor()->setRGB('000000');
+
+//SET border
+$S3->getStyle('I1:K5')->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_MEDIUM);
+//$S3->getStyle('B7:L12')->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S3->getStyle('F7:J7')->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S3->getStyle('B7:L12')->getBorders()->getVertical() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S3->getStyle('B11:L12')->getBorders()->getOutline() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S3->getStyle('B7:L10')->getBorders()->getOutline() ->setBorderStyle(PHPExcel_Style_Border::BORDER_MEDIUM);
+
+//SET STYLE
+$S3->getStyle('B7:L10')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$S3->getStyle('B7:L10')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$S3->getStyle('I1:K5')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$S3->getStyle('I1:K5')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+$S3->setCellValue('B1', 'BUDGET ANALYSIS SHEETS'); 
+//$S3->setCellValue('B2', 'TERM '.$term_s.' (JULY 2024 - JUNE 2025)'); 
+$S3->setCellValue('B3', 'DEPART/SECT : '.$sect_s);
+$S3->setCellValue('C1', 'F'); 
+$S3->setCellValue('C2', 'V'); 
+$S3->setCellValue('D1', 'FIXED COST'); 
+$S3->setCellValue('D2', 'VARIABLE COST'); 
+$S3->setCellValue('I1', 'CHECKED 2'); 
+$S3->setCellValue('I5', 'MGR/SM'); 
+$S3->setCellValue('J1', 'CHECKED 1'); 
+$S3->setCellValue('J5', 'CO SPV/ASMAN'); 
+$S3->setCellValue('K1', 'PREPARED'); 
+$S3->setCellValue('K5', 'SPV'); 
+$S3->setCellValue('B7', 'PART NAME'); 
+$S3->setCellValue('B11', 'Production Manhour Total'); 
+$S3->setCellValue('B12', 'Production Manhour / Month'); 
+$S3->setCellValue('C7', 'CTG'); 
+$S3->setCellValue('D7', 'Term 83'); 
+$S3->setCellValue('D8', 'STP'); 
+$S3->setCellValue('D9', 'Amount'); 
+$S3->setCellValue('D10', 'A'); 
+$S3->setCellValue('E7', 'Term 83'); 
+$S3->setCellValue('E8', 'Act+Forecast'); 
+$S3->setCellValue('E9', 'Amount'); 
+$S3->setCellValue('E10', 'B'); 
+$S3->setCellValue('F7', 'Term 84');
+$S3->setCellValue('F8', 'Nariyuki'); 
+$S3->setCellValue('F9', 'Amount'); 
+$S3->setCellValue('F10', 'C'); 
+$S3->setCellValue('G8', 'Cost Push'); 
+$S3->setCellValue('G9', 'Amount'); 
+$S3->setCellValue('G10', 'D'); 
+$S3->setCellValue('H8', 'Cost Reduction'); 
+$S3->setCellValue('H9', 'Amount'); 
+$S3->setCellValue('H10', 'E');
+$S3->setCellValue('I8', 'Other'); 
+$S3->setCellValue('I9', 'Amount'); 
+$S3->setCellValue('I10', 'F'); 
+$S3->setCellValue('J8', 'STP'); 
+$S3->setCellValue('J9', 'Amount'); 
+$S3->setCellValue('J10', 'G'); 
+$S3->setCellValue('K7', 'PERCENTAGE'); 
+$S3->setCellValue('K10', 'H=(G-C)/C'); 
+$S3->setCellValue('L7', 'Remarks'); 
+$S3->setCellValue('M12', 'CEK (Harus 0)'); 
+
+
+$mh_stp= "select distinct mh_s,mh_act,mh_p from bps_budget_stp_mh where term='$term_s' ";
+		$tb_mh_stp=odbc_exec($koneksi_lp,$mh_stp);
+		
+		while($baris_stp_mh=odbc_fetch_array($tb_mh_stp)){
+			
+			$S3->setCellValue('D11', odbc_result($tb_mh_stp,"mh_s") ); 
+			$S3->setCellValue('E11', odbc_result($tb_mh_stp,"mh_act") ); 
+			$S3->setCellValue('J11', odbc_result($tb_mh_stp,"mh_p") );
+			$S3->setCellValue('D12','=D11/12');
+			$S3->setCellValue('E12','=E11/12');
+			$S3->setCellValue('J12','=J11/12');
+			$S3->setCellValue('F11', odbc_result($tb_mh_stp,"mh_p") );
+			$S3->setCellValue('F12','=J11/12');
+			
+		}
+		
+
+$S3->setCellValue('B2', 'TERM '.$term_s.' ('.strtoupper(date("F Y",strtotime($tgl31))). ' - ' .strtoupper(date("F Y",strtotime($tgl31."+11 month"))). ')' ); 
+
+$Qry3="select distinct phase,part_nm,remark,urut,ctg,cost_push,cost_reduction,cost_other,nariyuki,ISNULL((select sum(dbo.lp_konprc('$term_s','USD',curr,price*qty)) from bps_budget where phase=a.phase and part_nm=a.part_nm and term='$term_sum' $sec_sa),0) as amt1,ISNULL((select sum(price) from bps_budget_stp_act where phase=a.phase and part_nm=a.part_nm and term='$term_sum' $sec_sa),0) as price from bps_budget_stp a where term='$term_s' $sec_s and revisi='$rev_s' order by urut asc";
+if($sect_s==""){
+	$Qry3="select distinct phase,part_nm,urut,ctg,cost_push,cost_reduction,cost_other,nariyuki,ISNULL((select sum(dbo.lp_konprc('$term_s','USD',curr,price*qty)) from bps_budget where phase=a.phase and part_nm=a.part_nm and term='$term_sum' $sec_sa),0) as qty,ISNULL((select sum(price) from bps_budget_stp_act where phase=a.phase and part_nm=a.part_nm and term='$term_sum' $sec_sa),0) as price from bps_budget_stp a where term='$term_s' $sec_s and revisi='$rev_s' order by urut asc";
+}
+
+$baris_a  = 14; //Ini untuk dimulai baris datanya
+
+		$tb_part_a=odbc_exec($koneksi_lp,$Qry3);
+		$row_a=0;
+		$row1_a=0;
+		$cost_other="0";
+				while($baris1_a=odbc_fetch_array($tb_part_a)){
+				$row_a++;
+				
+				$part_nm=odbc_result($tb_part_a,"part_nm");
+				$category=odbc_result($tb_part_a,"phase");
+				
+				$ctg=odbc_result($tb_part_a,"ctg");
+				$cost_push=odbc_result($tb_part_a,"cost_push");
+				$cost_reduction=odbc_result($tb_part_a,"cost_reduction");
+				$cost_other=odbc_result($tb_part_a,"cost_other");
+				$nariyuki=odbc_result($tb_part_a,"nariyuki");
+						
+						$S3->setCellValueByColumnAndRow(0,$baris_a,odbc_result($tb_part_a,"phase"));						
+						$S3->setCellValueByColumnAndRow(1,$baris_a,odbc_result($tb_part_a,"part_nm"));	
+						
+						if($sect_s!=""){
+						$S3->setCellValueByColumnAndRow(11,$baris_a,odbc_result($tb_part_a,"remark"));
+						}
+						
+						$S3->setCellValueByColumnAndRow(2,$baris_a,odbc_result($tb_part_a,"ctg"));
+						$S3->setCellValueByColumnAndRow(3,$baris_a,odbc_result($tb_part_a,"amt1")); 	
+						$S3->setCellValueByColumnAndRow(4,$baris_a,odbc_result($tb_part_a,"price")); 
+						$S3->setCellValueByColumnAndRow(5,$baris_a,'=IF(C'.$baris_a.'="F",E'.$baris_a.',E'.$baris_a.'/$E$12*$F$12)');
+						$S3->setCellValueByColumnAndRow(6,$baris_a,'=IF(F'.$baris_a.'<J'.$baris_a.',J'.$baris_a.'-F'.$baris_a.',0)');	
+						$S3->setCellValueByColumnAndRow(7,$baris_a,'=IF(F'.$baris_a.'>J'.$baris_a.',J'.$baris_a.'-F'.$baris_a.',0)');
+
+						$S3->setCellValueByColumnAndRow(8,$baris_a,$cost_other);
+						$S3->setCellValueByColumnAndRow(9,$baris_a,"=SUMIFS('".$Jdl."'!BO13:BO100000,'".$Jdl."'!D13:D100000,B".$baris_a.",'".$Jdl."'!J13:J100000,A".$baris_a.")");
+						$S3->setCellValueByColumnAndRow(10,$baris_a,"=IFERROR(IF(F".$baris_a.">0,(J".$baris_a."-F".$baris_a.")/F".$baris_a.",100%),0)");
+						$S3->setCellValueByColumnAndRow(12,$baris_a,'=J'.$baris_a.'-SUM(F'.$baris_a.':I'.$baris_a.')');
+						
+					
+						
+						
+					$S3->getStyle('K14:K'.$baris_a)->getNumberFormat()->applyFromArray( 
+							array( 
+								'code' => PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE
+							)
+						);
+
+					$S3->getStyle('E14:J'.$baris_a)->getNumberFormat()->setFormatCode('_(* #,##0.0_);_(* (#,##0.0);_(* "-"??_);_(@_)'); 
+					$S3->getStyle('L14:L'.$baris_a)->getNumberFormat()->setFormatCode('_(* #,##0.0_);_(* (#,##0.0);_(* "-"??_);_(@_)'); 
+					$S3->getStyle('D12:D'.$baris_a)->getNumberFormat()->setFormatCode("_(* #,##0.00_);_(* \(#,##0.00\);_(* \"-\"??_);_(@_)");
+					$S3->getStyle('M14:M'.$baris_a)->getNumberFormat()->setFormatCode("_(* #,##0.0_);_(* (#,##0.0);_(* \"-\"??_);_(@_)");
+
+					$S3->getStyle('L14:L'.$baris_a)->getAlignment()->setWrapText(true);
+					$S3->getStyle('C1:C'.$baris_a)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+					$S3->getStyle('C1:C'.$baris_a)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+					$S3->getStyle('B14:L'.$baris_a)->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+					$S3->getStyle('F8:F'.$baris_a)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('a9d08e');
+					$S3->getStyle('J8:J'.$baris_a)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('ffff99');
+					$S3->getStyle('M1:M'.$baris_a)->getFont()->setBold(false)->setName('Calibri')->setSize(11)->getColor()->setRGB('FF0000');
+
+
+					$baris_a++;
+
+						
+
+				}				
+
+
+
+// Rename 3nd sheet
+$excelku->getActiveSheet(2)->setTitle($Jdl3);
+
+//Start analysis all
+//if($sect_s=="ALL"){
+
+
+
+
+// MULAI MEMBUAT SHEET KE 5 ( TAKI GRAPH )
+$excelku->CreateSheet(); //harus setelah default sheet 0
+
+$excelku->setActiveSheetIndex();
+$S4 = $excelku->setActiveSheetIndex(3);
+$Jdl4='TAKI GRAPH';
+// Rename 4nd sheet
+$excelku->getActiveSheet(3)->setTitle($Jdl4);
+
+
+// Set lebar kolom
+$excelku->getActiveSheet(3)->getColumnDimension('A')->setWidth(5);
+$excelku->getActiveSheet(3)->getColumnDimension('B')->setWidth(20);
+$excelku->getActiveSheet(3)->getColumnDimension('C')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('D')->setWidth(20);
+$excelku->getActiveSheet(3)->getColumnDimension('E')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('F')->setWidth(22);
+$excelku->getActiveSheet(3)->getColumnDimension('G')->setWidth(20);
+$excelku->getActiveSheet(3)->getColumnDimension('H')->setWidth(9);
+$excelku->getActiveSheet(3)->getColumnDimension('I')->setWidth(9);
+$excelku->getActiveSheet(3)->getColumnDimension('J')->setWidth(9);
+$excelku->getActiveSheet(3)->getColumnDimension('K')->setWidth(22);
+$excelku->getActiveSheet(3)->getColumnDimension('L')->setWidth(5);
+$excelku->getActiveSheet(3)->getColumnDimension('M')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('N')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('O')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('P')->setWidth(20);  // P SAMPAI BN 12
+$excelku->getActiveSheet(3)->getColumnDimension('Q')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('R')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('S')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('T')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('U')->setWidth(7);
+$excelku->getActiveSheet(3)->getColumnDimension('V')->setWidth(5);
+$excelku->getActiveSheet(3)->getColumnDimension('W')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('X')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('Y')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('Z')->setWidth(7);
+$excelku->getActiveSheet(3)->getColumnDimension('AA')->setWidth(5);
+$excelku->getActiveSheet(3)->getColumnDimension('AB')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('AC')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('AD')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('AE')->setWidth(7); //add
+$excelku->getActiveSheet(3)->getColumnDimension('AF')->setWidth(5);
+$excelku->getActiveSheet(3)->getColumnDimension('AG')->setWidth(15);
+$excelku->getActiveSheet(3)->getColumnDimension('AH')->setWidth(5);
+$excelku->getActiveSheet(3)->getColumnDimension('AI')->setWidth(15);
+
+//SET STYLE
+$S4->getStyle('A1:F1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$S4->getStyle('A1:F1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$S4->getStyle('A2:F2')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$S4->getStyle('A2:F2')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$S4->getStyle('A8:G8')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$S4->getStyle('A8:G8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+$S4->setCellValue('B1', 'Refleksi Term '.$term_sum);
+$S4->setCellValue('C1', 'Additional Budget');
+$S4->setCellValue('D1', 'Item Tidak Dipakai');
+$S4->setCellValue('B2', 'STP Term '.$term_s);
+$S4->setCellValue('C2', 'Cost Push Harga Naik');
+$S4->setCellValue('D2', 'Cost Push Qty Naik');
+$S4->setCellValue('E2', 'Cost Push Item Baru');
+$S4->setCellValue('F2', 'Cost Reduction');
+
+$S4->setCellValue('A8', 'No');
+$S4->setCellValue('B8', 'Item');
+$S4->setCellValue('C8', 'Amount');
+$S4->setCellValue('D8', 'Remark');
+$S4->setCellValue('F8', 'Keterangan');
+$S4->setCellValue('E8', 'Term');
+$S4->setCellValue('G8', 'Measure for FY'.$term_s.' STP');
+
+
+$Qry_t="select distinct sect,item,amount,remark,keterangan,term,measure from bps_budget_stp_taki where term_budget='$term_s' and sect='$sect_s' and revisi='$rev_s' order by term asc";
+$baris_at  = 9; //Ini untuk dimulai baris datanya
+//echo $qry_t;
+		$tb_part_at=odbc_exec($koneksi_lp,$Qry_t);
+		$row_at=0;
+		$row1_at=0;
+
+				while($baris1_at=odbc_fetch_array($tb_part_at)){
+				$row_at++;
+				
+				$item=odbc_result($tb_part_at,"item");
+				$amount=odbc_result($tb_part_at,"amount");
+				$remark=odbc_result($tb_part_at,"remark");
+				$keterangan=odbc_result($tb_part_at,"keterangan");
+				$term=odbc_result($tb_part_at,"term");
+				$measure=odbc_result($tb_part_at,"measure");
+			
+				
+$S4->setCellValueByColumnAndRow(0,$baris_at,$row_at);						
+$S4->setCellValueByColumnAndRow(1,$baris_at,$item);	
+$S4->setCellValueByColumnAndRow(2,$baris_at,$amount);
+$S4->setCellValueByColumnAndRow(3,$baris_at,$remark);
+$S4->setCellValueByColumnAndRow(5,$baris_at,$keterangan);
+$S4->setCellValueByColumnAndRow(4,$baris_at,$term);
+$S4->setCellValueByColumnAndRow(6,$baris_at,$measure);
+
+
+$S4->getStyle('A8:G'.$baris_at)->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+$baris_at++;
+} 
+
+
+if($sect_s=="ALL"){
+	// MULAI MEMBUAT SHEET KE 5 ( ANALYSIS FOR FINANCE )
+$excelku->CreateSheet(); //harus setelah default sheet 0
+
+$excelku->setActiveSheetIndex();
+$S5 = $excelku->setActiveSheetIndex(4);
+$Jdl5='SUM ANALYSIS FINANCE';
+
+
+// Set lebar kolom
+$excelku->getActiveSheet(4)->getColumnDimension('A')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('B')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('C')->setWidth(30);
+$excelku->getActiveSheet(4)->getColumnDimension('D')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('E')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('F')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('G')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('H')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('I')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('J')->setWidth(14.5);
+
+//set tinggi row
+
+$excelku->getActiveSheet(4)->getRowDimension('1')->setrowHeight(16.25);
+$excelku->getActiveSheet(4)->getRowDimension('2')->setrowHeight(16.25);
+$excelku->getActiveSheet(4)->getRowDimension('3')->setrowHeight(16.25);
+$excelku->getActiveSheet(4)->getRowDimension('4')->setrowHeight(16.25);
+$excelku->getActiveSheet(4)->getRowDimension('5')->setrowHeight(16.25);
+$excelku->getActiveSheet(4)->getRowDimension('6')->setrowHeight(16.25); 
+
+// Mergecell, menyatukan beberapa kolom
+$excelku->getActiveSheet(4)->mergeCells('A4:A7');  
+$excelku->getActiveSheet(4)->mergeCells('B4:B7');  
+$excelku->getActiveSheet(4)->mergeCells('C4:C7');  
+$excelku->getActiveSheet(4)->mergeCells('F4:J4'); 
+
+
+//SET fill
+
+$S5->getStyle('A1:C2')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('FFC000');		//ORANGE
+$S5->getStyle('A8:J9')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('9bc2e6');		//BIRU
+$S5->getStyle('F5:F9')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('a9d08e');	//hijau	
+$S5->getStyle('J5:J9')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('ffff99');		//KUNING
+
+//set style font
+$S5->getStyle('A4:J7')->getFont()->setBold(true)->setName('Calibri')->setSize(11)->getColor()->setRGB('000000');
+
+
+//SET border
+
+$S5->getStyle('F4:J4')->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S5->getStyle('A4:J9')->getBorders()->getVertical() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S5->getStyle('A8:J9')->getBorders()->getOutline() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S5->getStyle('A8:D9')->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S5->getStyle('A4:J7')->getBorders()->getOutline() ->setBorderStyle(PHPExcel_Style_Border::BORDER_MEDIUM);
+
+//SET STYLE
+$S5->getStyle('A4:J7')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$S5->getStyle('A4:J7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$S5->getStyle('A8:J9')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$S5->getStyle('A8:J9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+
+$S5->setCellValue('A1', 'SUMMARY EXPENSE TERM-'.$term_s);
+$S5->setCellValue('A2', 'BUDGET ANALYSIS SHEETS FOR FINANCE'); 
+//$S5->setCellValue('B2', 'TERM '.$term_s.' (JULY 2024 - JUNE 2025)'); 
+
+$S5->setCellValue('A4', 'DEPT'); 
+$S5->setCellValue('B4', 'SECT'); 
+$S5->setCellValue('C4', 'CATEGORY'); 
+$S5->setCellValue('C8', 'MH/th'); 
+$S5->setCellValue('C9', 'Average MH'); 
+$S5->setCellValue('D4', 'Term '.$term_sum); 
+$S5->setCellValue('D5', 'Plan'); 
+$S5->setCellValue('D6', 'Amount'); 
+$S5->setCellValue('D7', 'A'); 
+$S5->setCellValue('E4', 'Term '.$term_sum); 
+$S5->setCellValue('E5', 'Act+Forecast'); 
+$S5->setCellValue('E6', 'Amount'); 
+$S5->setCellValue('E7', 'B'); 
+$S5->setCellValue('F4', 'Term '.$term_s);
+$S5->setCellValue('F5', 'Nariyuki'); 
+$S5->setCellValue('F6', 'Amount'); 
+$S5->setCellValue('F7', 'C'); 
+$S5->setCellValue('G5', 'Cost Push'); 
+$S5->setCellValue('G6', 'Amount'); 
+$S5->setCellValue('G7', 'D'); 
+$S5->setCellValue('H5', 'Cost Reduction'); 
+$S5->setCellValue('H6', 'Amount'); 
+$S5->setCellValue('H7', 'E');
+$S5->setCellValue('I5', 'Other'); 
+$S5->setCellValue('I6', 'Amount'); 
+$S5->setCellValue('I7', 'F'); 
+$S5->setCellValue('J5', 'STP'); 
+$S5->setCellValue('J6', 'Amount'); 
+$S5->setCellValue('J7', 'G'); 
+$S5->setCellValue('K9', 'CEK (Harus 0)'); 
+
+
+
+}
+	/*
+if($sect_s=="ALL"){
+// MULAI MEMBUAT SHEET KE 5 ( ANALYSIS FOR FINANCE )
+$excelku->CreateSheet(); //harus setelah default sheet 0
+
+$excelku->setActiveSheetIndex();
+$S5 = $excelku->setActiveSheetIndex(4);
+$Jdl5='SUM ANALYSIS FINANCE';
+
+
+// Set lebar kolom
+$excelku->getActiveSheet(4)->getColumnDimension('A')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('B')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('C')->setWidth(30);
+$excelku->getActiveSheet(4)->getColumnDimension('D')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('E')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('F')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('G')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('H')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('I')->setWidth(14.5);
+$excelku->getActiveSheet(4)->getColumnDimension('J')->setWidth(14.5);
+
+//set tinggi row
+
+$excelku->getActiveSheet(4)->getRowDimension('1')->setrowHeight(16.25);
+$excelku->getActiveSheet(4)->getRowDimension('2')->setrowHeight(16.25);
+$excelku->getActiveSheet(4)->getRowDimension('3')->setrowHeight(16.25);
+$excelku->getActiveSheet(4)->getRowDimension('4')->setrowHeight(16.25);
+$excelku->getActiveSheet(4)->getRowDimension('5')->setrowHeight(16.25);
+$excelku->getActiveSheet(4)->getRowDimension('6')->setrowHeight(16.25); 
+
+// Mergecell, menyatukan beberapa kolom
+$excelku->getActiveSheet(4)->mergeCells('A4:A7');  
+$excelku->getActiveSheet(4)->mergeCells('B4:B7');  
+$excelku->getActiveSheet(4)->mergeCells('C4:C7');  
+$excelku->getActiveSheet(4)->mergeCells('F4:J4'); 
+
+
+//SET fill
+
+$S5->getStyle('A1:C2')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('FFC000');		//ORANGE
+$S5->getStyle('A8:J9')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('9bc2e6');		//BIRU
+$S5->getStyle('F5:F9')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('a9d08e');	//hijau	
+$S5->getStyle('J5:J9')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('ffff99');		//KUNING
+
+//set style font
+$S5->getStyle('A4:J7')->getFont()->setBold(true)->setName('Calibri')->setSize(11)->getColor()->setRGB('000000');
+
+
+//SET border
+
+$S5->getStyle('F4:J4')->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S5->getStyle('A4:J9')->getBorders()->getVertical() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S5->getStyle('A8:J9')->getBorders()->getOutline() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S5->getStyle('A8:D9')->getBorders()->getAllBorders() ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$S5->getStyle('A4:J7')->getBorders()->getOutline() ->setBorderStyle(PHPExcel_Style_Border::BORDER_MEDIUM);
+
+//SET STYLE
+$S5->getStyle('A4:J7')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$S5->getStyle('A4:J7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$S5->getStyle('A8:J9')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$S5->getStyle('A8:J9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+
+$S5->setCellValue('A1', 'SUMMARY EXPENSE TERM-'.$term_s);
+$S5->setCellValue('A2', 'BUDGET ANALYSIS SHEETS FOR FINANCE'); 
+//$S5->setCellValue('B2', 'TERM '.$term_s.' (JULY 2024 - JUNE 2025)'); 
+
+$S5->setCellValue('A4', 'DEPT'); 
+$S5->setCellValue('B4', 'SECT'); 
+$S5->setCellValue('C4', 'CATEGORY'); 
+$S5->setCellValue('C8', 'MH/th'); 
+$S5->setCellValue('C9', 'Average MH'); 
+$S5->setCellValue('D4', 'Term '.$term_sum); 
+$S5->setCellValue('D5', 'Plan'); 
+$S5->setCellValue('D6', 'Amount'); 
+$S5->setCellValue('D7', 'A'); 
+$S5->setCellValue('E4', 'Term '.$term_sum); 
+$S5->setCellValue('E5', 'Act+Forecast'); 
+$S5->setCellValue('E6', 'Amount'); 
+$S5->setCellValue('E7', 'B'); 
+$S5->setCellValue('F4', 'Term '.$term_s);
+$S5->setCellValue('F5', 'Nariyuki'); 
+$S5->setCellValue('F6', 'Amount'); 
+$S5->setCellValue('F7', 'C'); 
+$S5->setCellValue('G5', 'Cost Push'); 
+$S5->setCellValue('G6', 'Amount'); 
+$S5->setCellValue('G7', 'D'); 
+$S5->setCellValue('H5', 'Cost Reduction'); 
+$S5->setCellValue('H6', 'Amount'); 
+$S5->setCellValue('H7', 'E');
+$S5->setCellValue('I5', 'Other'); 
+$S5->setCellValue('I6', 'Amount'); 
+$S5->setCellValue('I7', 'F'); 
+$S5->setCellValue('J5', 'STP'); 
+$S5->setCellValue('J6', 'Amount'); 
+$S5->setCellValue('J7', 'G'); 
+$S5->setCellValue('K9', 'CEK (Harus 0)'); 
+
+
+				$Qry4="select distinct dept,sect_detail from bps_budget_stp where term='$term_s' and revisi='$rev_s' order by dept,sect_detail";
+				$baris_af  = 11; //Ini untuk dimulai baris datanya
+
+				$tb_part_af=odbc_exec($koneksi_lp,$Qry4);
+				$row_af=0;
+				$row1_af=0;
+				
+				$arrphase[0]="RUTIN";
+				$arrphase[1]="INSIDENTAL";
+				$arrphase[2]="PROJECT";
+				$arrphase[3]="IMPROVEMENT";
+
+				while($baris1_af=odbc_fetch_array($tb_part_af)){
+				$row_af++;
+				
+			
+				$dept=odbc_result($tb_part_af,"dept");
+				$sec_det=odbc_result($tb_part_af,"sect_detail");
+				
+					
+
+					for($f=0;$f<4;$f++){
+						
+						$deptsect=$dept."-".$sec_det;
+						$kateg=$arrphase[$f];
+						
+						$S5->setCellValueByColumnAndRow(0,$baris_af,$dept);						
+						$S5->setCellValueByColumnAndRow(1,$baris_af,$sec_det);
+						$S5->setCellValueByColumnAndRow(2,$baris_af,$kateg);
+						
+					
+				$peri_s_af= "select distinct periode from bps_budget_stp where term='$term_s' order by periode asc";
+	
+				$tb_peri_s_af=odbc_exec($koneksi_lp,$peri_s_af);
+		
+					while($baris_s22f=odbc_fetch_array($tb_peri_s_af)){
+
+	$year_a=date("Y",strtotime(odbc_result($tb_peri_s_a,"periode")."01"));
+	$year2_a=$year_a-1; 
+
+$cost_push="0";
+$cost_reduction="0";
+$cost_other="0";
+$nariyuki="0";
+$total_amt_a="0";
+$total_usd="0";
+					
+							$peri1_s_fa= "select distinct phase,sect,sum(distinct cost_push) as cost_push,sum(distinct cost_reduction) as cost_reduction,sum(distinct cost_other) as cost_other,sum(distinct nariyuki) as nariyuki,term,(select sum(qty) from bps_budget_stp where sect='$deptsect' and periode='".odbc_result($tb_peri_s_a,"periode")."' and term='$term_s' and phase like '$kateg%' ) as qty_month,(select sum(dbo.lp_konprc(term,'USD',curr,price*qty)) from bps_budget_stp where sect='$deptsect' and periode='".odbc_result($tb_peri_s_a,"periode")."' and term='$term_s' and phase like '$kateg%') as usd_month,periode,(select sum(qty) from bps_budget_stp where sect='$deptsect' and term='$term_s' and phase like '$kateg%' ) as total_qty,(select sum(dbo.lp_konprc(term,'USD',curr,price*qty)) from bps_budget_stp where sect='$deptsect' and term='$term_s' and phase like '$kateg%' ) as total_usd
+				 from bps_budget_stp where sect='$deptsect' and term='$term_s' and periode='".odbc_result($tb_peri_s_a,"periode")."' and phase like '$kateg%' group by phase,sect,term,periode order by phase asc ";
+		
+												$tb_peri1_s_fa=odbc_exec($koneksi_lp,$peri1_s_fa);
+											
+												
+													while($baris22_s_fa=odbc_fetch_array($tb_peri1_s_fa)){
+														
+														$cost_push=odbc_result($tb_peri1_s_fa,"cost_push");
+														$cost_reduction=odbc_result($tb_peri1_s_fa,"cost_reduction");
+														$cost_other=odbc_result($tb_peri1_s_fa,"cost_other");
+														$nariyuki=odbc_result($tb_peri1_s_fa,"nariyuki");
+														$total_usd=odbc_result($tb_peri1_s_fa,"total_usd");
+														
+													
+													}	
+	
+			}
+
+$qry_sum_bef_fa="SELECT isnull(sum(qty_sum),0) as qty_sum,isnull(sum(amt),0) as amt_sum from (select distinct sum(t.QTY) as qty_sum,t.phase as phase,sum(t.amt) as amt FROM (select distinct sum(a.qty_act) AS QTY,sum(dbo.lp_konprc('$term_s','USD',curr,price_tot*qty_act)) as amt,a.phase as phase,(select top 1 b.status from bps_approve b where b.no_doc=a.pr_no and b.status='finish') as status_dok
+			 from bps_tmpPR a where a.term='$term_sum' and a.pr_no like '$deptsect%' and a.periode<='".$tahunnya1."12' group by a.pr_no,a.phase) t where t.status_dok='finish' and t.phase like '$kateg%'  group by t.phase,t.amt
+			 union
+select distinct sum(a.qty) as qty_sum,a.phase,sum(dbo.lp_konprc('$term_s','USD',curr,a.qty*a.price)) as amt from bps_budget a where not exists (select no_ctrl from bps_tmpPR where no_ctrl=a.no_ctrl and tgl_updt<'".$tahunnya."-01-01') and periode>='".$tahunnya."01' and term='$term_sum' and sect='$deptsect' and phase like '$kateg%' group by a.phase) X ";
+
+			
+				$tb_sum_bef_fa=odbc_exec($koneksi_lp,$qry_sum_bef_fa);
+				$row_s_fa=0;
+						while($baris_s2_a=odbc_fetch_array($tb_sum_bef_fa)){
+							$row_s_fa++;
+							
+						
+							$amt_sum_s=odbc_result($tb_sum_bef_fa,"amt_sum");
+							
+		
+			$S5->setCellValueByColumnAndRow(4,$baris_af,$amt_sum_s); 	
+	
+			
+
+		}
+
+$mh_stp_fa= "select distinct mh_s,mh_act,mh_p from bps_budget_stp_mh where term='$term_s' ";
+		$tb_mh_stp_fa=odbc_exec($koneksi_lp,$mh_stp_fa);
+		
+		while($baris_stp_mh=odbc_fetch_array($tb_mh_stp_fa)){
+			
+			$S5->setCellValue('D8', odbc_result($tb_mh_stp_fa,"mh_s") ); 
+			$S5->setCellValue('E8', odbc_result($tb_mh_stp_fa,"mh_act") ); 
+			$S5->setCellValue('J8', odbc_result($tb_mh_stp_fa,"mh_p") );
+			$S5->setCellValue('D9','=D8/12');
+			$S5->setCellValue('E9','=E8/12');
+			$S5->setCellValue('J9','=J8/12');
+			$S5->setCellValue('F8', odbc_result($tb_mh_stp_fa,"mh_p") );
+			$S5->setCellValue('F9','=J8/12');
+			
+		}
+
+$sql_bud_s_fa= "select distinct phase,(select sum(dbo.lp_konprc(term,'USD',curr,price*qty)) from bps_budget_FA where sect='$deptsect' and phase like '$kateg%' and term='$term_sum') as total_amt_a from bps_budget_FA where sect='$deptsect' and term='$term_sum' and phase like '$kateg%' group by phase";
+		$tb_sql_bud_s_fa=odbc_exec($koneksi_lp,$sql_bud_s_fa);
+		
+		while($baris_bud_s=odbc_fetch_array($tb_sql_bud_s_fa)){
+			$total_amt_a=odbc_result($tb_sql_bud_s_fa,"total_amt_a");
+			
+			
+//echo $sql_bud_s;
+		}
+
+	
+
+
+$S5->setCellValueByColumnAndRow(5,$baris_af,$nariyuki);
+$S5->setCellValueByColumnAndRow(6,$baris_af,$cost_push);
+$S5->setCellValueByColumnAndRow(7,$baris_af,$cost_reduction);
+$S5->setCellValueByColumnAndRow(8,$baris_af,$cost_other);
+$S5->setCellValueByColumnAndRow(9,$baris_af,$total_usd);
+$S5->setCellValueByColumnAndRow(3,$baris_af,$total_amt_a);
+$S5->setCellValueByColumnAndRow(10,$baris_af,'=J'.$baris_af.'-SUM(F'.$baris_af.':I'.$baris_af.')');
+
+$S5->getStyle('D8:J9')->getNumberFormat()->setFormatCode("_(* #,##0.00_);_(* \(#,##0.00\);_(* \"-\"??_);_(@_)");						
+$S5->getStyle('D11:J'.$baris_af)->getNumberFormat()->setFormatCode("_(* #,##0.00_);_(* \(#,##0.00\);_(* \"-\"??_);_(@_)");
+$S5->getStyle('K11:K'.$baris_af)->getNumberFormat()->setFormatCode("_(* #,##0.0_);_(* (#,##0.0);_(* \"-\"??_);_(@_)");
+
+$S5->getStyle('A8:J'.$baris_af)->getFont()->setBold(false)->setName('Calibri')->setSize(11)->getColor()->setRGB('000000');
+$S5->getStyle('K1:K'.$baris_af)->getFont()->setBold(false)->setName('Calibri')->setSize(11)->getColor()->setRGB('FF0000');						
+						
+						$baris_af++;
+					}
+
+				
+				}
+
+// Rename 5nd sheet
+$excelku->getActiveSheet(4)->setTitle($Jdl5);
+
+}
+
+//End analysis all
+//}
+
+*/
+
+// untuk excel 2007 atau yang berekstensi .xlsx
+header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+header('Content-Disposition: attachment;filename='.$Jdl.'.xlsx');
+header('Cache-Control: max-age=0');
+ $styleArray = array(
+  'borders' => array(
+    'allborders' => array(
+      'style' => PHPExcel_Style_Border::BORDER_THIN
+    )
+  )
+);
+
+
+$objWriter = PHPExcel_IOFactory::createWriter($excelku, 'Excel2007');
+//this line is necessary to display chart in excel
+$objWriter->setIncludeCharts(TRUE);
+$objWriter->save('php://output');
+exit;
+echo "<h3>EXPORT DATA ".$Jdl." SUDAH SELESAI DENGAN JUMLAH DATA ".$bar." BARIS</h3>";
+echo $Qry;
+?>

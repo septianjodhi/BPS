@@ -1,0 +1,453 @@
+<style>
+	.my-custom-scrollbar {
+		position: relative;
+		height: 400px;
+		overflow: auto;
+	}
+	.table-wrapper-scroll-y {
+		display: block;
+	}
+</style>
+<script>
+	function open_childX(url,title,w,h){
+		var left = (screen.width/2)-(w/2);
+		var top = (screen.height/2)-(h/2);
+		w = window.open(url, title, 'toolbar=no, location=no, directories=no, \n\
+			status=no, menubar=no, scrollbar=no, resizabel=no, copyhistory=no,\n\
+			width='+w+',height='+h+',top='+top+',left='+left);
+	};	
+	function pil_add(){
+		$("#list_part").html('');
+		var lstctrl=document.frmcari.noctrlplh.value;
+//if(lstctrl==""){alert('ANDA BELUM MEMILIH DATA');}else{
+	jQuery.ajax({
+		type: 'GET',
+		url: 'select/list_noctrl_add.php',
+		dataType:"text", 
+		data: {'ctrl':lstctrl,'sesi':'<?php echo $_SESSION['lok']; ?>'}, 
+		success:function(response){
+			$("#list_part").append(response);
+			$('#mdplhpr').modal('show');
+		},
+		error:function (xhr, ajaxOptions, thrownError){
+			alert(thrownError);
+		}
+	});
+//}	
+};
+</script>
+<?php
+$lok= $_SESSION['lok'];
+$sect=$_SESSION["area"]; 
+$pic=$_SESSION["nama"];
+$bln1=date("ym");
+if(isset($_POST['smpn_doc']) ){
+	
+	$pchsec=explode("-",$sect);
+	$dept=$pchsec[0];
+	$sec=$pchsec[1];
+	//$rmk_ad=$_POST['rmk_ad'];
+	$qry_nodoc="select max(RIGHT(doc_no,3)) as nn from bps_budget_add where sect='$sect' and convert(nvarchar(4),doc_date,12)='$bln1'";
+	$tb_nodoc=odbc_exec($koneksi_lp,$qry_nodoc);
+	$nodoc=0;
+	while($bar_nodoc=odbc_fetch_array($tb_nodoc)){
+		$nodoc=odbc_result($tb_nodoc,"nn");
+	}
+	$nodoc=$nodoc+1;
+	$nodoc3=substr('000'.$nodoc,-3);
+	$add_docno=$sect."-ADD-".$bln1."-".$nodoc3;	
+
+	foreach ($_POST['plh'] as $_boxValue2)
+	{
+		$np2=explode("|",$_boxValue2);	
+		$updt_add_budget="update bps_budget_add set doc_no='$add_docno',doc_date=getdate() where no_ctrl_add='$np2[0]'";
+		$tb_updtadd=odbc_exec($koneksi_lp,$updt_add_budget);
+	}
+
+	$qry_deladdaprv="delete from bps_approve where jns_doc in('ADD') and no_doc='$add_docno'";
+	$tb_deladdaprv=odbc_exec($koneksi_lp,$qry_deladdaprv);
+	
+	$amoun_IDR=0;
+	$sql_amount="select distinct sum(dbo.lp_konprc(term,'IDR',curr,qty*price)) as idr 
+	from bps_budget_add where doc_no='$add_docno' group by doc_no";
+	$tb_amount=odbc_exec($koneksi_lp,$sql_amount);
+	while($bar_moun=odbc_fetch_array($tb_amount)){
+		$amoun_IDR=odbc_result($tb_amount,"idr");
+	}
+
+	$cr_kdchg=odbc_exec($koneksi_lp, "select distinct kode_chg from bps_budget_add where doc_no='$add_docno' ");
+
+	$x=0;$kd_chg="";
+	while ( odbc_fetch_array($cr_kdchg)) {
+		$kode_chg=odbc_result($cr_kdchg, "kode_chg");
+		$kd_chg=$kode_chg.",".$kd_chg;
+		$x++;
+	}
+	$jml_data=count(explode(",", $kd_chg));
+
+	if ($kode_chg==4 and $jml_data==1) {
+		$qry_addaprv="insert into bps_approve(pic_plan, email_plan, no_doc, tgl_prepaire,
+		jns_doc,sect,initial,  approve,no_aprv)
+		SELECT nama as pic_plan,email as email_plan,'$add_docno' as no_doc,getdate() as
+		tgl_prepaire,jns_dok as jns_doc,sect,initial,approve,no_aprv  FROM bps_setApprove 
+		where status_akun='aktif' and jns_dok in('ADD') and (sect='$sect' or sect='$dept-ALL' or (sect='SAMI-ALL' AND no_aprv=4))";
+	}else{
+		$qry_addaprv="insert into bps_approve(pic_plan, email_plan, no_doc, tgl_prepaire,
+		jns_doc,sect,initial, approve,no_aprv)
+		SELECT nama as pic_plan,email as email_plan,'$add_docno' as no_doc,getdate() as
+		tgl_prepaire,jns_dok as jns_doc,sect,initial,approve,no_aprv FROM bps_setApprove 
+		where status_akun='aktif' and jns_dok in('ADD') and (sect='$sect' or sect='$dept-ALL' or 
+		(sect='SAMI-ALL' AND (max_amount='0' or (min_amount<='$amoun_IDR' and 
+		max_amount>'$amoun_IDR'))))";
+	}
+
+	$tb_addaprv=odbc_exec($koneksi_lp,$qry_addaprv);
+	
+	echo "<script>alert('DATA BERHASIL DISIMPAN DENGAN NO DOKUMEN $add_docno');</script>";
+}
+?>
+
+<section class="content">
+	<div class="container-fluid">
+		<div class="block-header">
+			<h2>Additional Budget</h2>
+		</div>
+		<div class="row clearfix">	
+			<div class="card">
+				<div class="row clearfix">
+					<div class="header">
+						<h2>Record<small>Cari Additional Budget</small></h2>
+					</div>
+					<div class="body">
+						<form action="" id="form" method="post"  enctype="multipart/form-data">
+							<div class="col-sm-3">	
+								<div class="form-group">
+									<label>Periode</label>
+									<select class="selectpicker" style="width: 100%;"  name="peri" id="peri" required>
+										<option selected="selected" value="">--Pilih Periode--</option>
+										
+										<?php
+										
+											 if (($_SESSION["area"] == 'LOG-EXIM') or ($_SESSION["area"] == 'PGA-QS') or  ($_SESSION["area"] == 'PGA-GS')) {
+                $previousPeriod = date('Ym', strtotime('-2 month'));
+                $PERIODEEE = "a.periode >= '$previousPeriod'";
+            } else {
+                $PERIODEEE = "a.periode >= convert(nvarchar(6), getdate(), 112)";
+            }
+										$tb_peri=odbc_exec($koneksi_lp,"select distinct periode from bps_budget_add where sect='$sect' and doc_no is NULL  order by periode asc");
+										while($baris1=odbc_fetch_array($tb_peri)){ 
+											$peri=odbc_result($tb_peri,"periode");
+											echo '<option value="'.$peri.'">'.$peri.'</option>';
+										}?>
+									</select>
+								</div>
+							</div>
+							<?php /*
+							$qry_nodoc="select max(RIGHT(doc_no,3)) as nn from bps_budget_add where sect='$sect' and convert(nvarchar(4),doc_date,12)='$bln1'";
+							$tb_nodoc=odbc_exec($koneksi_lp,$qry_nodoc);
+							$nn=odbc_result($tb_nodoc, "nn");
+							?>
+							<div class="col-sm-2">	
+								<div class="form-group">
+									<label>Next No</label>
+									<input type="text" name="no_urut" value="<?php echo $nn; ?>">
+								</div>
+							</div>
+							*/?>
+							<div class="col-sm-4">
+								<button type="submit" name="cr_b" id="cr_b" class="btn bg-purple btn-circle-lg waves-effect waves-circle waves-float"><i class="material-icons">search</i> </button>
+							</div>
+						</form>
+					</div>	
+				</div>
+			</div>
+		</div>
+		<?php
+		if(isset($_POST['cr_b']) ){	
+			$peri=$_POST['peri'];
+			$qrycrdt="select count(*) as jmc from bps_budget_add where periode='$peri' and sect='$sect'";
+			$tb_crdt=odbc_exec($koneksi_lp,$qrycrdt);
+//echo $qrycrdt;
+			$jm=0;
+			while($barcrdt=odbc_fetch_array($tb_crdt)){
+				$jm=odbc_result($tb_crdt,"jmc");
+			}
+			if($jm==0){
+				echo "<script>alert('TIDAK ADA DATA YANG DI CARI');</script>";
+			}else{	
+				?>	
+				<div class="row clearfix">
+					<div class="card">
+						<form action="" id="frmcari" name="frmcari" method="post"  enctype="multipart/form-data">
+							<div class="row clearfix">				
+								<div class="header">
+									<h2>Buat Purchase Requisition (PR) Section <?php echo $sect; ?></h2>
+								</div>
+								<div class="body">
+									<div class="col-sm-2">	
+										<div class="form-group">
+											<label>Periode</label>
+											<div class="form-line">
+												<input type="text" readonly name="plhperi" id="plhperi" value="<?php echo $peri; ?>" class="form-control"  required>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row clearfix">
+								<div class="body">
+									<div class="table-wrapper-scroll-y my-custom-scrollbar">
+										<table id="dtVerticalScroll_vvvv" class="table table-striped table-bordered " cellspacing="0" width="100%">
+											<thead>
+												<tr>	
+													<th>Pilih</th>
+													<th>Part No</th>
+													<th>Part Name</th>
+													<th>Part Detail</th>
+													<th>Part Desc</th>
+													<th>Qty</th>
+													<th>Term</th>
+													<th>Periode</th>
+													<th>Curr</th>
+													<th>Price</th>
+													<th>Amount</th>
+													<th>Purchasing</th>
+													<th>Phase</th>
+													<th>Remark ADD</th>
+													<th>Exp Budget</th>
+												</tr>
+											</thead>
+											<tbody>
+												<?php
+												$sq_acc="select bps_budget_add.*,(select top 1 price from bps_Quotation where part_no=bps_budget_add.part_no and lp_rekom='YES' and Exp_Quo>bps_budget_add.expaired) as price_quo from bps_budget_add where periode='$peri' and sect='$sect' and doc_no is NULL order by part_no asc";
+												$tb_acc=odbc_exec($koneksi_lp,$sq_acc);
+												$row=0;
+												while($baris1=odbc_fetch_array($tb_acc)){ 
+													$period=odbc_result($tb_acc,"periode");
+													//$qty=number_format(odbc_result($tb_acc,"qty"), '2', '.', '.');
+													$qty=number_format(odbc_result($tb_acc,"qty"), strlen(explode('.',(string) odbc_result($tb_acc,"qty"))[1]), '.', '.');
+													$prc=odbc_result($tb_acc,"price");
+													$kode_chg=odbc_result($tb_acc,"kode_chg");
+													$price_quo=odbc_result($tb_acc,"price_quo");
+													if($prc>$price_quo){$price_t=$price_quo;}
+													else{$price_t=$prc;}
+
+													$amount=$qty*$prc;
+													$no_ctrl=odbc_result($tb_acc,"no_ctrl");
+													$no_ctrl_add=odbc_result($tb_acc,"no_ctrl_add");  
+													if($peri<=$period){
+														$row++;
+														$plh="on";
+														if($peri>$period){$plh="off";}
+														?>	
+														<tr>				
+															<td >
+																<?php if($plh=="on"){ ?>
+																	<div class="switch" ><label><input type="checkbox" name="plh[]" id="plh" value="<?php echo $no_ctrl_add.'|'.$no_ctrl.'|'.$period.'|'.$amount.'|'.$kode_chg ; ?>" onclick="dipilih(this.form);"><span class="lever"></span></label></div>
+																<?php }else{ echo '<i class="material-icons">clear</i>';} ?>
+															</td>
+															<td><?php echo odbc_result($tb_acc,"part_no"); ?></td>
+															<td><?php echo odbc_result($tb_acc,"part_nm"); ?></td>
+															<td><?php echo odbc_result($tb_acc,"part_dtl"); ?></td>
+															<td><?php echo odbc_result($tb_acc,"part_desc"); ?></td>
+															<td><?php echo $qty; ?></td>
+															<td><?php echo odbc_result($tb_acc,"term"); ?></td>
+															<td><?php echo odbc_result($tb_acc,"periode"); ?></td>
+															<td><?php echo odbc_result($tb_acc,"curr"); ?></td>
+															<td><?php echo number_format($prc,2,".",","); ?></td>
+															<td><?php echo number_format($amount,0,".",","); ?></td>
+															<td><?php echo odbc_result($tb_acc,"lp"); ?></td>
+															<td><?php echo odbc_result($tb_acc,"phase"); ?></td>
+															<td><?php echo odbc_result($tb_acc,"ket_chg"); ?></td>
+															<td><?php echo odbc_result($tb_acc,"expaired"); ?></td>
+														</tr>	
+														<?php 
+													}
+												}
+												?>	
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>  
+							<?php if(isset($_POST['cr_b']) and $row>0){ ?>
+								<div class="row clearfix">	
+									<div class="body">		
+										<button type="button" class="btn"  onclick="pil_add(); return false;"><i class="material-icons">search</i> </button>
+									</div>     
+								</div> 			
+							<?php } ?>	
+							<div class="modal fade" id="mdplhpr" tabindex="-1" role="dialog">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header"><h4 class="modal-title" id="defaultModalLabel">List Budget Dipilih</h4>
+										</div>
+										<div class="modal-body">
+											<div class="body">
+												<input type="text" class="form-control" id="noctrlplh" name="noctrlplh" required>
+												<div id="list_part">		
+												</div>
+											</div>  
+											<div class="modal-footer">
+												<button type="submit" id="smpn_doc" name="smpn_doc" class="btn bg-green waves-effect"><i class="material-icons">saves</i>Save</button><button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>	
+						</form>       
+					</div>
+				</div>  
+				<?php 
+			}
+		} 
+		?>
+		<div class="row clearfix">
+			<div class="card">
+				<div class="header">
+					<h2>Print Dokumen Additional Section <?php echo $sect; ?></h2>
+				</div>
+				<form action="" id="frm_rmk" name="frm_rmk" method="post"  enctype="multipart/form-data">
+					<div class="row clearfix">
+						<div class="body">
+							<div class="table-responsive">
+								<table id="example" class="table table-bordered table-striped table-hover dataTable js-exportable tabel2">
+									<thead>
+										<tr>	
+											<th>DOC NO</th>
+											<th>PERIODE</th>
+											<th>DOC DATE</th>
+											<th>QTY</th>
+											<th>AMOUNT</th>
+											<th>SECT</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										<?php
+										$sq_docadd="
+										select doc_no,min(doc_date) as doc_date,a.periode,sum(qty) as qty,sum(qty*price) as amount,a.sect,b.status
+										from bps_budget_add a left join bps_approve b on a.doc_no=b.no_doc and a.sect=b.sect
+										where a.sect='$sect' and doc_no is not NULL and $PERIODEEE
+										group by doc_no,a.sect,b.status,a.periode";//and (b.status='close' or b.status is null) and a.periode>=convert(nvarchar(6),getdate(),112)
+										$tb_docadd=odbc_exec($koneksi_lp,$sq_docadd);//echo $sq_docadd;
+										$i=0;
+										while($bar_pr=odbc_fetch_array($tb_docadd)){ $i++;
+											$docno=odbc_result($tb_docadd,"doc_no");
+											?>	
+											<tr onclick="javascript:pilih(this);" >
+												<td><?php echo $docno; ?></td>
+												<td><?php echo date("Y-m-d",strtotime(odbc_result($tb_docadd,"doc_date"))); ?></td>
+												<td><?php echo number_format(odbc_result($tb_docadd,"periode"),2,".",","); ?></td>
+												<td><?php echo number_format(odbc_result($tb_docadd,"qty"),2,".",","); ?></td>
+												<td><?php echo number_format(odbc_result($tb_docadd,"amount"),2,".",","); ?></td>
+												<td><?php echo odbc_result($tb_docadd,"sect"); ?></td>
+												<td>
+													<button type="button" class="btn bg-green waves-effect" onclick="open_child('Exp_pdf/print_add.php?nomor=<?php echo $i;?>&nodoc=<?php echo $docno;?>','Print Add Budget <?php echo $docno;?>','800','500'); return false;"><i class="material-icons">print</i></button>
+													<?php
+													$jml_data=odbc_exec($koneksi_lp,"select isnull(count(no_ctrl),0) as jm from bps_PR where no_ctrl in (select no_ctrl from bps_budget_add where doc_no='$docno' )" );
+													$jml=odbc_result(	$jml_data, "jm");
+													$status_doc=odbc_result($tb_docadd,"status");
+													if ($status_doc=='' or $status_doc=='Close') {?>
+														<a href="##"><i onclick="open_child('select/rev_add.php?sec=<?php echo $sect;?>&sesi=<?php echo $lok;?>&nodoc=<?php echo $docno;?>','Edit ADD <?php echo $docno;?>','800','500'); return false;" class="material-icons">edit</i></a>
+														<a href="#" class="btn bg-red waves-effect" onClick="deleteadd()" ><i class="material-icons">delete</i></a>
+													<?php }?>
+												</td>	
+											</tr>	
+											<?php 
+										}
+										?>	
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</form> 
+			</div>
+		</div>
+	</div>
+</section>
+
+<div class="modal fade" id="mddel" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" id="defaultModalLabel">HAPUS ADDITIONAL BUDGET</h4>
+			</div>
+			<form action="" id="frmdel" name="frmdel" method="post"  enctype="multipart/form-data">
+				<div class="modal-body">
+					APAKAH ANDA YAKIN INGIN MENGHAPUS
+					<input type="text" readonly class="form-control" data-role="tagsinput" id="no_add" name="no_add" placeholder="DOC NO"  required>
+					<div class="modal-footer">
+						<button type="submit" id="deladd" name="deladd" class="btn btn-link waves-effect">HAPUS</button>
+						<button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<?php
+if(isset($_POST['deladd']) ){	
+	$no_add=$_POST["no_add"];
+	$tb_del1=odbc_exec($koneksi_lp,"update bps_budget_add set doc_no=NULL,doc_date=NULL where doc_no='$no_add' ");
+	$tb_del1=odbc_exec($koneksi_lp,"delete from bps_approve where jns_doc='ADD' and no_doc='$no_add'");
+}
+?>
+
+<script>
+	function dipilih(frm){
+		var PlhData="";
+		var PchData="";
+		var data0="";
+		var data1="<?php echo $row; ?>";
+		if(data1=="1"){
+			data0 += "<?php echo $no_ctrl_add; ?>,";
+		}else{
+			for (i = 0; i < frm.plh.length; i++){
+				if (frm.plh[i].checked){
+					var dataisi=frm.plh[i].value;
+					PchData=dataisi.split('|');
+					data0 += PchData[0] +",";
+
+				}else{
+
+				}	
+			}	}
+			document.frmcari.noctrlplh.value=data0;
+		}	
+	</script>
+
+	<script>
+		function pilih(row){
+/*=================================================
+var kd_pel4=row.cells[3].innerHTML;
+alert(kd_pel4);}
+function kol(kol){
+alert(kol+' dari tombol');
+
+var kd_pel1=kol.cells[1].innerHTML;=================================================*/
+var kd_pel12=row.cells[0].innerHTML;
+//alert(kd_pel12);
+document.frmdel.no_add.value=kd_pel12;
+/*=================================================
+var icoplus='<i class="material-icons">add_circle</i>';
+var icomin='<i class="material-icons">remove_circle</i>';
+alert(kd_pel1+icoplus);
+if(kd_pel1==icoplus){
+kol.cells[1].innerHTML=icomin;
+}else{
+	kol.cells[1].innerHTML=icoplus;}=================================================*/
+}
+
+
+//var kd_pel0=row.cells[0].innerHTML;
+
+//alert(row.cells.item(1).innerHTML);
+
+function deleteadd(){
+	$('#mddel').modal('show');
+     // window.location.assign('urlkedua')
+ };
+</script>

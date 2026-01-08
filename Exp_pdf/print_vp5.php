@@ -1,0 +1,446 @@
+<?php
+error_reporting(0);
+session_start();
+
+include "../koneksi.php";
+include "../plugins/phpqrcode/qrlib.php";
+$periode = date("d-m-Y H:i:s");
+$nomor = $_GET['nomor'];
+$kd = $_GET['no_doc'];
+$sect = $_GET['sect'];
+$lokasi = $_SESSION['lokasi'];
+//-----------------------Kode program untuk mencetak halaman----------------------//
+$nama_dokumen = 'VP NO = ' . $kd; //Beri nama file PDF hasil.
+
+include("../mpdf57/mpdf.php");
+$mpdf = new mPDF('utf-8', 'A4'); // Create new mPDF Document
+//$mpdf->setFooter("Halaman {PAGENO} dari {nb}");
+$ng = "";
+$qry_ceksupp = "select * from bps_kontrak_supp where  tgl_berakhir>=getdate() and exists(select * from bps_vp where vp_no='$kd' and kode_supp=bps_kontrak_supp.kode_supp)";
+$tb_qry_ceksupp = odbc_exec($koneksi_lp, $qry_ceksupp);
+$ng = odbc_result($tb_qry_ceksupp, "kode_supp");
+$mpdf->SetWatermarkText('SUPPLIER NOT ACTIVE');
+$mpdf->watermark_font = 'DejaVuSansCondensed';
+if ($ng == "") {
+	$mpdf->showWatermarkText = true;
+} else {
+	$mpdf->showWatermarkText = false;
+}
+
+//Beginning Buffer to save PHP variables and HTML tags
+ob_start();
+//-----------------------Kode program untuk mencetak halaman----------------------//
+//-----------------------------Copy juga yang di bawah----------------------------//
+//direktory tempat menyimpan hasil generate qrcode jika folder belum dibuat maka secara otomatis akan membuat terlebih dahulu
+$tempdir = "temp_qr/";
+if (!file_exists($tempdir))
+	mkdir($tempdir);
+
+?>
+<script type="text/javascript" src="plugins/qr_code/qrcode.js"></script>
+
+<style type="text/css">
+	.sami {
+		font-weight: bold;
+		font-size: 24px;
+		text-align: left;
+		font-family: "Arial Black", Gadget, sans-serif;
+	}
+
+	.style3 {
+		font-family: Calibri
+	}
+</style>
+<?php
+$ttd = "<p><img src='..\..\img\logo_sami.png' width='80' height='50' alt='sami' /></p>";
+$sql_stk1 = "select *,(tot_bayar+(tot_bayar*a.ppn/100)-(tot_bayar*pph/100)) as byr,(select top 1 part_nm from bps_kedatangan where inv_no=a.inv_no) as acc from bps_vp a inner join LP_SUPP b on a.kode_supp=b.SUPP_CODE where vp_no='$kd' order by inv_no asc";
+$tb_stk1 = odbc_exec($koneksi_lp, $sql_stk1);
+//echo $sql_stk1;	
+//$supp_name="xxxxxx";
+$t_amn = 0;
+$t_byr = 0;
+while ($baris = odbc_fetch_array($tb_stk1)) {
+	$pph = odbc_result($tb_stk1, "pph");
+	$novp = odbc_result($tb_stk1, "vp_no");
+	$supp_name = odbc_result($tb_stk1, "supp_name");
+	$kode_suppp = odbc_result($tb_stk1, "kode_supp");
+	$tgl_doc = date("d-m-Y", strtotime(odbc_result($tb_stk1, "rcv_inv_date")));
+	$lp = odbc_result($tb_stk1, "lp");
+	$ppn = odbc_result($tb_stk1, "ppn");
+	$curr = odbc_result($tb_stk1, "curr");
+	$pic_updt = odbc_result($tb_stk1, "pic_updt");
+	$no_doc = odbc_result($tb_stk1, "po_no");
+	$reason = odbc_result($tb_stk1, "reason");
+	$paid_thru = odbc_result($tb_stk1, "paid_thru");
+	$discount = odbc_result($tb_stk1, "discount");
+	//$paid_date=date("d-m-Y",strtotime(odbc_result($tb_stk1,"paid_date")));
+	//$cenvertedTime = date('Y-m-d H:i:s',strtotime('+1 day +1 hour +30 minutes +45 seconds',strtotime($startTime)));
+	$paid_date = date("d-m-Y", strtotime('+30 day', strtotime($tgl_doc)));
+
+	$curr_vpno = "USD";
+	if ($curr == "IDR") {
+		$curr_vpno = "IDR";
+	}
+
+	$bank_vpno = "MUFG";
+	if ($kode_suppp == "PGA") {
+		$bank_vpno = "MANDIRI";
+	}
+
+	$no_vpp = "&nbsp;&nbsp;&nbsp;&nbsp;/" . date("my", strtotime($paid_date)) . "/" . $bank_vpno . " " . $curr_vpno . "/K";
+	$amn = odbc_result($tb_stk1, "tot_bayar");
+	$amntik = $amn - $discount;
+	$acc = odbc_result($tb_stk1, "acc");
+
+	if ($lokasi == "TF") {
+		$amntik = $amn - $discount;
+	} else {
+		//if ($acc == "6288901" || $acc == "7288903" || $acc == "7288904") {
+		 if ($acc == "CATERING") {
+			$amntik = $amn * 100 / 110;
+			//$amntik = $amn * 100 / 100;
+		}
+	}
+
+
+	$amt_adj = odbc_result($tb_stk1, "amt_adj");
+
+
+	if ($amt_adj == "") {
+		$amt_adj = 0;
+	}
+	// $t_amn=$t_amn+$amn;
+	$prc_ppn = floor($amntik * ($ppn / 100));
+	$prc_pph = floor($amntik * ($pph / 100));
+	$tot_bayar = ($amn - $discount) + $prc_ppn - $prc_pph;//$amn+$prc_ppn-$prc_pph-$discount;
+	$byr = odbc_result($tb_stk1, "byr");
+	$t_byr = $t_byr + $tot_bayar;
+}
+if ($curr == 'IDR') {
+	$total = floor($t_byr) + $amt_adj;
+} else {
+	$total = $t_byr;
+}
+
+$sql_stk12 = "select distinct
+a.kode_supp,a.inv_no,a.rcv_inv_date,a.inv_no,a.reason,a.pph
+,a.ppn,b.account,b.cccode,b.sect_to,b.curr,b.part_dtl,'Nominal' as reffno,sum(b.qty_dtg) as qtyact,sum(b.price*b.qty_dtg) as amt from bps_vp a
+inner join bps_kedatangan b on a.inv_no=b.inv_no where a.vp_no='$kd' group by
+a.kode_supp,a.inv_no,a.rcv_inv_date,a.inv_no,a.reason,b.account,b.cccode,b.sect_to,b.curr,b.part_dtl,a.pph
+,a.ppn 
+union 
+select distinct 'KN2' as
+kode_supp,a.inv_no,a.rcv_inv_date,a.inv_no,a.reason,a.pph,a.ppn,'1112901' as account,'JPI000' as
+cccode,'FA-FIN' as sect_to,a.curr,a.reason as part_dtl,'PPH MIN' as reffno,'1' as qtyact,-
+(a.tot_bayar*a.pph/100) as amt from bps_vp a where a.vp_no='$kd' group by
+a.inv_no,a.rcv_inv_date,a.inv_no,a.curr,a.pph,a.reason,a.tot_bayar,a.ppn 
+union 
+select distinct 'KN2'
+as kode_supp,a.inv_no,a.rcv_inv_date,a.inv_no,a.reason,a.pph,a.ppn,'1112901' as account,'JPI000' as
+cccode,'FA-FIN' as sect_to,a.curr,a.reason as part_dtl,'PPH PLUS' as reffno,'1' as
+qtyact,(a.tot_bayar*a.pph/100) as amt from bps_vp a where a.vp_no='$kd' group by
+a.inv_no,a.rcv_inv_date,a.inv_no,a.curr,a.pph,a.reason,a.tot_bayar,a.ppn 
+union 
+select distinct 'KN2'
+as kode_supp,a.inv_no,a.rcv_inv_date,a.inv_no,a.reason,a.pph,a.ppn,'1181101' as account,'JPI000' as
+cccode,'FA-FIN' as sect_to,a.curr,a.reason as part_dtl,'PPN' as reffno,'1' as
+qtyact,(a.tot_bayar*a.ppn/100) as amt from bps_vp a where a.vp_no='$kd' group by
+a.inv_no,a.rcv_inv_date,a.inv_no,a.curr,a.ppn,a.reason,a.tot_bayar,a.pph
+";
+$tb_stk12 = odbc_exec($koneksi_lp, $sql_stk12);
+$qr_code = "";
+$row_qr = 0;
+while ($baris2 = odbc_fetch_array($tb_stk12)) {
+	$row_qr++;
+	$amt_qr = odbc_result($tb_stk12, "amt");
+	if ($row_qr > 1) {
+		$qr_code = $qr_code . "\r";
+	}
+	//echo $amt_qr;
+	if ($amt_qr <> "0.0" and $amt_qr <> "-0.0") {
+		$kode_supp_qr = odbc_result($tb_stk12, "kode_supp");
+		$inv_tgl_qr = date("m/d/Y", strtotime(odbc_result($tb_stk12, "inv_tgl")));
+		$inv_no_qr = odbc_result($tb_stk12, "inv_no");
+		$reason_qr = odbc_result($tb_stk12, "reason");
+		$account_qr = odbc_result($tb_stk12, "account");
+		$cccode_qr = odbc_result($tb_stk12, "cccode");
+		$sect_to_qr = odbc_result($tb_stk12, "sect_to");
+		$curr_qr = odbc_result($tb_stk12, "curr");
+		$part_dtl_qr = odbc_result($tb_stk12, "part_dtl");
+		$qtyact_qr = odbc_result($tb_stk12, "qtyact");
+		$reffno_qr = odbc_result($tb_stk12, "reffno");
+		$pph_qr = odbc_result($tb_stk12, "pph");
+		$ppn_qr = odbc_result($tb_stk12, "ppn");
+
+		if ($reffno_qr == "Nominal") {
+			$qr_code = $qr_code . $kode_supp_qr . "~" . $inv_tgl_qr . "~" . $inv_no_qr . "~" . $reason_qr . "~" . $account_qr . "~" . $cccode_qr . "~" . $sect_to_qr . "~" . $curr_qr . "~" . $qtyact_qr . "~" . $amt_qr . "~" . $qtyact_qr . " " . $part_dtl_qr;
+		} else if ($reffno_qr == "PPH MIN") {
+			$qr_code = $qr_code . $kode_supp_qr . "~" . $inv_tgl_qr . "~" . $inv_no_qr . "~" . $reason_qr . "~" . $account_qr . "~" . $cccode_qr . "~" . $sect_to_qr . "~" . $curr_qr . "~" . $qtyact_qr . "~" . $amt_qr . "~PPH " . $pph_qr . "% " . $reason_qr;
+		} else if ($reffno_qr == "PPH PLUS") {
+			$qr_code = $qr_code . $kode_supp_qr . "~" . $inv_tgl_qr . "~" . $inv_no_qr . "~" . " PPH " . $pph_qr . "% " . $reason_qr . "~" . $account_qr . "~" . $cccode_qr . "~" . $sect_to_qr . "~" . $curr_qr . "~" . $qtyact_qr . "~" . $amt_qr . "~PPH " . $pph_qr . "% " . $reason_qr;
+		} else if ($reffno_qr == "PPN") {
+			$qr_code = $qr_code . $kode_supp_qr . "~" . $inv_tgl_qr . "~" . $inv_no_qr . "~" . $reason_qr . "~" . $account_qr . "~" . $cccode_qr . "~" . $sect_to_qr . "~" . $curr_qr . "~" . $qtyact_qr . "~" . $amt_qr . "~PPN " . $ppn . "% " . $reason_qr;
+		}
+
+
+	}
+	//echo $qr_code;
+
+}
+
+?>
+
+<table width="780" height="100" border="0">
+	<tr>
+		<td width="52"></td>
+		<td width="430" colspan="9" align="center" valign="bottom" font size="16px">
+			<font face="Arial Narrow"><strong>PT. SEMARANG AUTOCOMP MANUFACTURING INDONESIA</strong></font>
+		</td>
+		<td height="20" colspan="6">&nbsp;</td>
+	</tr>
+	<tr>
+		<td rowspan="2"><img src='..\images\confidential.jpg' width="70" height="50"></td>
+		<td height="20" colspan="9" align="center" font size="14px">
+			<font face="Arial Narrow"><strong>WIRING HARNESS MANUFACTURER </strong></font>
+		</td>
+		<td width="34" style="font-family: Arial Narrow, Helvetica, sans-serif; font-size: 12px;">No.</td>
+		<td width="9">:</td>
+		<!--<td width="114" colspan="4">__________________</td>-->
+		<td width="114" colspan="4" style="font-family: Arial Narrow, Helvetica, sans-serif; font-size: 10px;">
+			<?php echo $no_vpp; ?></td>
+	</tr>
+	<tr>
+		<td colspan="9" rowspan="2" align="center" style="font-family: Century Gothic; font-size: 28px;">
+			<strong><u>VOUCHER PAYING</u></strong></td>
+		<td height="20" style="font-family: Arial Narrow, Helvetica, sans-serif; font-size: 12px;">Date</td>
+		<td>:</td>
+		<td colspan="4" style="font-family: Arial Narrow, Helvetica, sans-serif; font-size: 12px;">
+			<?php echo $tgl_doc; ?></td>
+	</tr>
+	<tr>
+		<td style="font-size: 10px;"><?php echo $kd; ?></td>
+		<td height="20" style="font-size: 12px;">Dept.</td>
+		<td>:</td>
+		<td colspan="4" style="font-size: 12px;"><?php echo $sect; ?></td>
+	</tr>
+
+</table>
+<?php
+function penyebut($nilai)
+{
+	$nilai = abs($nilai);
+	$huruf = array("", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas");
+	$temp = "";
+	if ($nilai < 12) {
+		$temp = " " . $huruf[$nilai];
+	} else if ($nilai < 20) {
+		$temp = penyebut($nilai - 10) . " belas";
+	} else if ($nilai < 100) {
+		$temp = penyebut($nilai / 10) . " puluh" . penyebut($nilai % 10);
+	} else if ($nilai < 200) {
+		$temp = " seratus" . penyebut($nilai - 100);
+	} else if ($nilai < 1000) {
+		$temp = penyebut($nilai / 100) . " ratus" . penyebut($nilai % 100);
+	} else if ($nilai < 2000) {
+		$temp = " seribu" . penyebut($nilai - 1000);
+	} else if ($nilai < 1000000) {
+		$temp = penyebut($nilai / 1000) . " ribu" . penyebut($nilai % 1000);
+	} else if ($nilai < 1000000000) {
+		$temp = penyebut($nilai / 1000000) . " juta" . penyebut($nilai % 1000000);
+	} else if ($nilai < 1000000000000) {
+		$temp = penyebut($nilai / 1000000000) . " milyar" . penyebut(fmod($nilai, 1000000000));
+	} else if ($nilai < 1000000000000000) {
+		$temp = penyebut($nilai / 1000000000000) . " trilyun" . penyebut(fmod($nilai, 1000000000000));
+	}
+	return $temp;
+}
+
+function terbilang($nilai)
+{
+	if ($nilai < 0) {
+		$hasil = "minus " . trim(penyebut($nilai));
+	} else {
+		$hasil = trim(penyebut($nilai));
+	}
+	return $hasil;
+}
+//$angka = $amn;
+?>
+<table width="782" border="1" style="font-family: Arial Narrow, Helvetica, sans-serif; border-collapse: collapse;">
+	<tr>
+		<td width="200" colspan="6" height="35"><?php echo "Paid To :  " . $supp_name; ?></td>
+		<td colspan="10" rowspan="2">
+			<p>Amount <strong><?php
+			if ($curr == 'IDR') {
+				$kd_curr = "Rp. ";
+				$id_curr = " Rupiah";
+			} else if ($curr == 'JPY') {
+				$kd_curr = "JPY ";
+				$id_curr = " Japan Yen";
+			} else {
+				$kd_curr = "$ ";
+				$id_curr = " Dolar USD";
+			}
+
+			/*echo "DPP ".$kd_curr.number_format($amn,2,",",".");
+					 echo "<br>discount ".$kd_curr.number_format($discount,2,",",".");
+					 echo "<br>PPN ".$kd_curr.number_format($prc_ppn,2,",",".");
+					 echo "<br>pph ".$kd_curr.number_format($prc_pph,2,",",".");*/
+			echo $kd_curr . number_format($total, 2, ",", ".");
+
+
+			?>
+
+				</strong></p>
+			<br />
+			<p>Say : <em><u><strong><?php echo ucwords(terbilang($total)) . $id_curr; ?></strong></u></em></p>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="6" height="35">Date : <?php echo $paid_date; ?></td>
+	</tr>
+</table>
+
+<table width="750" height="163" border="1" frame="box"
+	style="font-family: Arial Narrow, Helvetica, sans-serif; border-collapse: collapse; font-size:14p;">
+	<tr>
+		<td height="90" valign="top">
+			<p>Payment For :</p>
+			<p>
+				<?php
+
+
+				//Isi dari QRCode Saat discan
+				$isi_teks1 = $kd;
+				//Nama file yang akan disimpan pada folder temp 
+				$namafile1 = $kd . ".png";
+				//Kualitas dari QRCode 
+				$quality1 = 'H';
+				//Ukuran besar QRCode
+				$ukuran1 = 8;
+				$padding1 = 0;
+				QRCode::png($isi_teks1, $tempdir . $namafile1, $quality1, $ukuran1, $padding1);
+				
+				
+				
+				
+
+				$tb_stk1 = odbc_exec($koneksi_lp, $sql_stk1);
+				$i = 0;
+				$t_amn = 0;
+				while ($baris = odbc_fetch_array($tb_stk1)) {
+					$i++;
+					$novp = odbc_result($tb_stk1, "vp_no");
+					$pph = odbc_result($tb_stk1, "pph");
+					$ppn = odbc_result($tb_stk1, "ppn");
+					$curr = odbc_result($tb_stk1, "curr");
+					$no_doc = odbc_result($tb_stk1, "po_no");
+					$amn = odbc_result($tb_stk1, "tot_bayar");
+
+					$acc = odbc_result($tb_stk1, "acc");
+					$amntik = $amn;
+
+					if ($lokasi == "TF") {
+						$amntik = $amn;
+					} else {
+						// if($acc=="6288901" || $acc=="7288903"){
+				
+						// 	$amntik=$amn*100/110;
+						// }
+						//if ($acc == "6288901" || $acc == "7288903" || $acc == "7288904") {
+						 if ($acc == "CATERING") {
+							$amntik = $amn * 100 / 110;
+							//$amntik = $amn * 100 / 100;
+						}
+
+					}
+
+
+
+					$t_amn = $t_amn + ($amn - $discount);
+					$prc_ppn = floor($t_amn * ($ppn / 100));
+					$prc_pph = floor($t_amn * ($pph / 100));
+					$discount = odbc_result($tb_stk1, "discount");
+					$tot_bayar = floor(($t_amn - $discount) + $prc_ppn - $prc_pph);
+					$po = odbc_result($tb_stk1, "inv_no");
+					$amn_inv = $amn + floor($amntik * ($ppn / 100)) - floor($amntik * ($pph / 100));
+					if ($i > 1) {
+						$amt_adj = 0;
+					}
+					echo "Invoice : " . $po . " = " . $curr . " " . number_format(floor($amn_inv) + $amt_adj, 2) . "<br>";
+				}
+				echo $gpo;
+				if ($discount != 0) {
+					echo "Discount = " . $curr . " " . number_format($discount, 2);
+				}
+				?>
+
+			</p>
+			<br />
+			<p><?php echo $reason; ?></p>
+		</td>
+		<td width="136" style="text-align: center; vertical-align: middle;">
+			<p>&nbsp;</p>
+			<p>&nbsp;</p>
+			<img src="temp_qr/<?php echo $namafile1; ?>" width="80px">
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" height="40" valign="top">Paid Thru : <?php echo ucwords($paid_thru); ?></td>
+
+	</tr>
+</table>
+
+<?php /**/ ?>
+<table border="1" style="font-family: Arial Narrow, Helvetica, sans-serif; border-collapse: collapse; font-size:14p;">
+	<?php
+	$sql_aprv = "select * from bps_approve where jns_doc='VP' and no_doc='$kd'  and initial<>'FA' AND initial<>'RMU' and email_plan is not null order by no_aprv desc";
+	$tb_aprv = odbc_exec($koneksi_lp, $sql_aprv);
+	$bar1 = "";
+	$bar2 = "";
+	$bar3 = "";
+	$stkipo=1;
+	while (odbc_fetch_array($tb_aprv)) {
+		
+		/*if(odbc_result($tb_aprv, "qr")!=""){
+			//Isi dari QRCode Saat discan
+				$isi_teks1 = odbc_result($tb_aprv, "qr");
+				//Nama file yang akan disimpan pada folder temp 
+				$namafile1 = $kd."_".odbc_result($tb_aprv, "approve"). ".png";
+				//Kualitas dari QRCode 
+				$quality1 = 'H';
+				//Ukuran besar QRCode
+				$ukuran1 = 8;
+				$padding1 = 0;
+				QRCode::png($isi_teks1, $tempdir . $namafile1, $quality1, $ukuran1, $padding1);
+		}
+		*/
+		$bar1 = $bar1 . '<td width="235" colspan="2" align="center">' . odbc_result($tb_aprv, "approve") . '</td>';
+		//$bar2 = $bar2 . '<td height="90" align="center" valign="bottom" colspan="2" style="font-family: Arial Narrow; font-size:11;"><img src="temp_qr/'.$namafile1.'" width="80px">' . odbc_result($tb_aprv, "initial") . '</td>';
+		$bar2 = $bar2 . '<td height="90" align="center" valign="center" colspan="2" style="font-family: Arial Narrow; font-size:11;"></td>';
+		$bar3 = $bar3 . '<td height="15" colspan="2" align="center">'. odbc_result($tb_aprv, "initial") . '</td>';
+			$stkipo++;
+	}
+	echo '<tr align="center">' . $bar1 . '</tr>';
+	echo '<tr align="center" valign="bottom">' . $bar2 . '</tr>';
+	echo '<tr align="left">' . $bar3 . '</tr>';
+	?>
+</table>
+
+
+
+
+
+
+
+<?php
+//-----------------------Kode program untuk mencetak halaman----------------------//
+$html = ob_get_contents(); //Proses untuk mengambil hasil dari OB..
+ob_end_clean();
+//Here convert the encode for UTF-8, if you prefer the ISO-8859-1 just change for $mpdf->WriteHTML($html);
+$mpdf->WriteHTML(utf8_encode($html));
+$mpdf->Output($nama_dokumen . ".pdf", 'I');
+
+exit;
+//-----------------------Kode program untuk mencetak halaman----------------------//
+?>

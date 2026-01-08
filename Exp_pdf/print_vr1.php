@@ -1,0 +1,286 @@
+<?php
+error_reporting(0);
+session_start();
+
+include "../koneksi.php";
+include "../plugins/phpqrcode/qrlib.php";
+$periode=date("d-m-Y H:i:s");
+$nomor=$_GET['nomor'];
+$kd=$_GET['no_doc'];
+$sect=$_GET['sect'];
+ $lokasi=$_SESSION['lokasi'];
+//-----------------------Kode program untuk mencetak halaman----------------------//
+$nama_dokumen='VP NO = '.$kd; //Beri nama file PDF hasil.
+
+include("../mpdf57/mpdf.php");
+$mpdf=new mPDF('utf-8', 'A4'); // Create new mPDF Document
+//$mpdf->setFooter("Halaman {PAGENO} dari {nb}");
+
+//Beginning Buffer to save PHP variables and HTML tags
+ob_start();
+//-----------------------Kode program untuk mencetak halaman----------------------//
+//-----------------------------Copy juga yang di bawah----------------------------//
+//direktory tempat menyimpan hasil generate qrcode jika folder belum dibuat maka secara otomatis akan membuat terlebih dahulu
+$tempdir = "temp_qr/"; 
+if (!file_exists($tempdir))
+    mkdir($tempdir);
+ 
+?>
+ <script type="text/javascript"  src="plugins/qr_code/qrcode.js"></script>
+		 
+<style type="text/css">
+	.sami{
+		font-weight: bold;
+		font-size: 24px;
+		text-align: left;
+		font-family: "Arial Black", Gadget, sans-serif;
+	}
+	.style3 {font-family: Calibri}
+</style>
+<?php
+$ttd="<p><img src='..\..\img\logo_sami.png' width='80' height='50' alt='sami' /></p>";
+$sql_stk1="select * from bps_vr a inner join LP_SUPP b on a.kode_supp=b.SUPP_CODE where vp_no='$kd' order by inv_no asc";
+$tb_stk1=odbc_exec($koneksi_lp,$sql_stk1);
+//echo $sql_stk1;	
+	//$supp_name="xxxxxx";
+$t_amn=0;$t_byr=0;
+while($baris=odbc_fetch_array($tb_stk1)){
+	
+	$novp=odbc_result($tb_stk1,"vp_no");
+	$invnoo=odbc_result($tb_stk1,"inv_no");
+	$supp_name=odbc_result($tb_stk1,"supp_name");
+	$kode_suppp=odbc_result($tb_stk1,"kode_supp");
+	$tgl_doc= date("d-m-Y",strtotime(odbc_result($tb_stk1,"rcv_inv_date")));
+	$lp=odbc_result($tb_stk1,"lp");
+	
+	$curr=odbc_result($tb_stk1,"curr");
+	$pic_updt=odbc_result($tb_stk1,"pic_updt");
+	
+	$reason=odbc_result($tb_stk1,"reason");
+	$paid_thru=odbc_result($tb_stk1,"paid_thru");
+	
+	$paid_date=date("d-m-Y",strtotime($tgl_doc));
+	
+	$curr_vpno="USD";
+	if($curr=="IDR"){
+		$curr_vpno="IDR";
+	}
+	
+	$bank_vpno="MUFG";
+	if($kode_suppp=="PGA"){
+		$bank_vpno="MANDIRI";
+	}
+	
+	$no_vpp="&nbsp;&nbsp;&nbsp;&nbsp;/".date("my",strtotime($paid_date))."/".$bank_vpno." ".$curr_vpno."/D";
+	$amn=odbc_result($tb_stk1,"tot_bayar");
+	$amntik=$amn-$discount;
+	$acc=odbc_result($tb_stk1,"acc");
+	
+	
+	$byr=odbc_result($tb_stk1,"tot_bayar");
+	$t_byr=$byr;
+}
+
+	$total=$t_byr;
+
+
+
+?>
+
+<table width="780" height="100" border="0">
+	<tr>
+		<td width="52"></td>
+		<td width="430" colspan="9"align="center" valign="bottom" font size="16px"><font face="Arial Narrow"><strong>PT. SEMARANG AUTOCOMP MANUFACTURING INDONESIA</strong></font></td>
+		<td height="20" colspan="6">&nbsp;</td>
+	</tr>
+	<tr>
+		<td rowspan="2"><img src='..\images\confidential.jpg' width="70" height="50"></td>
+		<td height="20" colspan="9" align="center" font size="14px"><font face="Arial Narrow"><strong>WIRING HARNESS MANUFACTURER </strong></font></td>
+		<td width="34" style="font-family: Arial Narrow, Helvetica, sans-serif; font-size: 12px;">No.</td>
+		<td width="9">:</td>
+		<!--<td width="114" colspan="4">__________________</td>-->
+		<td width="114" colspan="4" style="font-family: Arial Narrow, Helvetica, sans-serif; font-size: 10px;"><?php echo $no_vpp;?></td>
+	</tr>
+	<tr>
+		<td colspan="9" rowspan="2" align="center" style="font-family: Century Gothic; font-size: 28px;" ><strong><u>VOUCHER RECEIVING</u></strong></td>
+		<td height="20" style="font-family: Arial Narrow, Helvetica, sans-serif; font-size: 12px;">Date</td>
+		<td>:</td>
+		<td colspan="4" style="font-family: Arial Narrow, Helvetica, sans-serif; font-size: 12px;"><?php echo $tgl_doc;?></td>
+	</tr>
+	<tr>
+		<td style="font-size: 10px;"><?php echo $kd;?></td>
+		<td height="20" style="font-size: 12px;">Dept.</td>
+		<td>:</td>
+		<td colspan="4" style="font-size: 12px;"><?php echo $sect;?></td>
+	</tr>
+
+</table>
+<?php 
+function penyebut($nilai) {
+	$nilai = abs($nilai);
+	$huruf = array("", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas");
+	$temp = "";
+	if ($nilai < 12) {
+		$temp = " ". $huruf[$nilai];
+	} else if ($nilai <20) {
+		$temp = penyebut($nilai - 10). " belas";
+	} else if ($nilai < 100) {
+		$temp = penyebut($nilai/10)." puluh". penyebut($nilai % 10);
+	} else if ($nilai < 200) {
+		$temp = " seratus" . penyebut($nilai - 100);
+	} else if ($nilai < 1000) {
+		$temp = penyebut($nilai/100) . " ratus" . penyebut($nilai % 100);
+	} else if ($nilai < 2000) {
+		$temp = " seribu" . penyebut($nilai - 1000);
+	} else if ($nilai < 1000000) {
+		$temp = penyebut($nilai/1000) . " ribu" . penyebut($nilai % 1000);
+	} else if ($nilai < 1000000000) {
+		$temp = penyebut($nilai/1000000) . " juta" . penyebut($nilai % 1000000);
+	} else if ($nilai < 1000000000000) {
+		$temp = penyebut($nilai/1000000000) . " milyar" . penyebut(fmod($nilai,1000000000));
+	} else if ($nilai < 1000000000000000) {
+		$temp = penyebut($nilai/1000000000000) . " trilyun" . penyebut(fmod($nilai,1000000000000));
+	}     
+	return $temp;
+}
+
+function terbilang($nilai) {
+	if($nilai<0) {
+		$hasil = "minus ". trim(penyebut($nilai));
+	} else {
+		$hasil = trim(penyebut($nilai));
+	}     		
+	return $hasil;
+}
+	//$angka = $amn;
+?>
+<table width="782" border="1" style="font-family: Arial Narrow, Helvetica, sans-serif; border-collapse: collapse;">
+	<tr>
+		<td width="200" colspan="6" height="35"><?php echo "Received From :  ".$supp_name;?></td>
+		<td colspan="10" rowspan="2">
+			<p>Amount <strong><?php 
+			if($curr=='IDR'){
+				$kd_curr="Rp. ";
+				$id_curr=" Rupiah";
+			}
+			else if($curr=='JPY'){
+				$kd_curr="JPY ";
+				$id_curr=" Japan Yen";
+			}else if($curr=='EUR'){
+				$kd_curr="EUR ";
+				$id_curr=" Euro";
+			}else if($curr=='THB'){
+				$kd_curr="THB ";
+				$id_curr=" Bath";
+			}
+			else {
+				$kd_curr="$ ";
+				$id_curr=" Dolar USD";
+			}
+
+			/*echo "DPP ".$kd_curr.number_format($amn,2,",",".");
+			echo "<br>discount ".$kd_curr.number_format($discount,2,",",".");
+			echo "<br>PPN ".$kd_curr.number_format($prc_ppn,2,",",".");
+			echo "<br>pph ".$kd_curr.number_format($prc_pph,2,",",".");*/
+			echo $kd_curr.number_format($total,2,",",".");
+
+
+			?>
+
+			</strong></p>
+			<br/>
+			<p>Say  : <em><u><strong><?php echo ucwords(terbilang($total)).$id_curr;?></strong></u></em></p>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="6" height="35">Date :  </td>
+	</tr>
+</table>
+
+<table width="750" height="163" border="1"  frame="box" style="font-family: Arial Narrow, Helvetica, sans-serif; border-collapse: collapse; font-size:14p;">
+	<tr>
+		<td height="90" valign="top"><p>Description :</p>
+			<p>
+				<?php 
+				
+				
+        //Isi dari QRCode Saat discan
+        $isi_teks1 =$kd;
+        //Nama file yang akan disimpan pada folder temp 
+        $namafile1 = $kd.".png";
+        //Kualitas dari QRCode 
+        $quality1 = 'H'; 
+        //Ukuran besar QRCode
+        $ukuran1 = 8; 
+        $padding1 = 0; 
+        QRCode::png($isi_teks1,$tempdir.$namafile1,$quality1,$ukuran1,$padding1);
+    
+	
+				
+				echo $reason;
+				
+				?>
+
+			</p>
+			<br/>
+			
+			<td width="136" style="text-align: center; vertical-align: middle;">
+			<p><?php echo $invnoo; ?></p>
+			<p>&nbsp;</p>
+				<img src="temp_qr/<?php echo $namafile1; ?>" width="80px">
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" height="40" valign="top">Received Thru  : <?php echo ucwords($paid_thru);?></td>
+			
+		</tr>
+	</table>
+
+	<?php /**/?>
+	<table border="1" style="font-family: Arial Narrow, Helvetica, sans-serif; border-collapse: collapse; font-size:14p;">
+		
+		<?php
+		$sql_aprv="select * from bps_approve where jns_doc='VP' and no_doc='$kd'  and initial<>'FA' AND initial<>'RMU' and email_plan is not null order by no_aprv desc";
+		$tb_aprv=odbc_exec($koneksi_lp,$sql_aprv);
+		$bar1="";$bar2="";$bar3="";
+		while(odbc_fetch_array($tb_aprv)){
+			$bar1=$bar1.'<td width="195" colspan="2" align="center">'.odbc_result($tb_aprv,"approve").'</td>';
+			$bar2=$bar2.'<td height="90" align="center" valign="bottom" colspan="2" style="font-family: Arial Narrow; font-size:11;">'.odbc_result($tb_aprv,"initial").'</td>';
+			$bar3=$bar3.'<td height="15" colspan="2" align="left">date:</td>';
+		}
+		echo '<tr align="center">
+		
+		<td width="195" colspan="2" align="center">Cashier</td>
+		<td width="195" colspan="2" align="center">Approved</td>
+		<td width="195" colspan="2" align="center">Treasury</td>
+		<td width="195" colspan="2" align="center">Prepared</td>
+		<td width="195" colspan="2" align="center">Received</td>
+		</tr>';
+		echo '<tr align="center" valign="bottom">
+		<td height="90" align="center" valign="bottom" colspan="2" style="font-family: Arial Narrow; font-size:11;"></td>
+		<td height="90" align="center" valign="bottom" colspan="2" style="font-family: Arial Narrow; font-size:11;"></td>
+		<td height="90" align="center" valign="bottom" colspan="2" style="font-family: Arial Narrow; font-size:11;"></td>
+		<td height="90" align="center" valign="bottom" colspan="2" style="font-family: Arial Narrow; font-size:11;"></td>
+		<td height="90" align="center" valign="bottom" colspan="2" style="font-family: Arial Narrow; font-size:11;"></td>
+		</tr>';
+		echo '<tr align="left">'.$bar3.'</tr>';
+		?>
+	</table>
+	
+	
+	
+	
+                               
+	
+
+	<?php
+	//-----------------------Kode program untuk mencetak halaman----------------------//
+	$html = ob_get_contents(); //Proses untuk mengambil hasil dari OB..
+	ob_end_clean();
+	//Here convert the encode for UTF-8, if you prefer the ISO-8859-1 just change for $mpdf->WriteHTML($html);
+	$mpdf->WriteHTML(utf8_encode($html));
+	$mpdf->Output($nama_dokumen.".pdf" ,'I');
+
+	exit;
+	//-----------------------Kode program untuk mencetak halaman----------------------//
+?>

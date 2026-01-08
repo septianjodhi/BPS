@@ -1,0 +1,85 @@
+<?php
+session_start();
+include ("../koneksi.php");
+if(function_exists('date_default_timezone_set')) date_default_timezone_set('Asia/Jakarta');
+
+if (isset($_GET['token']) && isset($_GET['nik']) && isset($_GET['app_nm'])) {
+    $sqlCheckToken = "select * from access_tokens where token='".$_GET['token']."' and nik='".$_GET['nik']."'  and app='".$_GET['app_nm']."' and public_visit is null";
+    $clearToken = "update access_tokens set public_visit = now() where token='".$_GET['token']."' and nik='".$_GET['nik']."' and app='".$_GET['app_nm']."'";
+
+    $queryCheckToken = mysql_query($sqlCheckToken);
+    $tokenCleared = mysql_query($clearToken);
+
+    $validToken = false;
+    while($qBaris=mysql_fetch_array($queryCheckToken)){
+        $validToken = true;
+    }
+
+
+    if($validToken && $tokenCleared)
+    {	
+        
+        $sql2 = "select * from tbl_user where nik='".$_GET['nik']."' and app_nm='BPS'";
+        // 	echo $sql2;
+        // die();
+        $query=mysql_query($sql2);
+        
+        if($query){	$row=0;
+        
+        //session_register("nama");
+        //session_register("status");
+        while($baris=mysql_fetch_array($query)){
+                $nik		=$baris['nik'];
+                $nama		=$baris['nama'];
+                $status		=$baris['status'];
+                $akses		=$baris['akses'];
+                $area		=$baris['area'];
+                $users		=$baris['user'];
+                $website	="BPS";
+                $lokasi		=$lok;
+                $row++;
+        }
+        if($row > 0){
+        
+        
+                $_SESSION['isLoggedIn']=1;
+                $_SESSION['nik']=$nik;
+                $_SESSION['nama']=$nama;
+                $_SESSION['akses']=$akses;
+                $_SESSION['area']=$area;
+                $_SESSION['user']=$users;
+                $_SESSION['status']=$status;
+                $_SESSION['website']=$website;
+                $tgal=date("Y-m-d H:i:s",strtotime("now"));			
+                $_SESSION['lok']=$lokasi;
+                $_SESSION['lokasi']=$lokasi;
+            
+            //	$sql_us = "insert into Log_USER_ACT(NAMA,LOGIN,STATUS) values ('$users','$tgal','$status')";
+            //	$query_us=mysql_query($sql_us);
+                
+                
+            
+            echo "<script>window.location = 'http://10.62.124.17/sami-local/public/admin/dashboard/bps'</script>";
+                
+                
+            }else{
+            
+                echo "<script>alert('Username & Password tidak cocok'); window.location = '../index.php?inxd=login.php'</script>";
+            }
+
+        
+        
+            
+        }	
+        else{
+            echo "<script>alert('Username sedang digunakan, login dengan username lain!!!'); window.location = '../index.php?indx=login.php'</script>";
+        }
+
+    }else{
+        echo "<script>window.location = 'http://10.62.124.17/sami-local/public/admin/dashboard/bps'</script>";
+
+    }
+}else{
+    echo "forbiden 1";
+}
+?>

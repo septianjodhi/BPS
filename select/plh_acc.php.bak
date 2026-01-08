@@ -1,0 +1,72 @@
+ <div class="card">
+ <div class="container-fluid">
+ <?php
+ $acc=$_GET['ac'];
+ $txacc=$_GET['acc'];
+ if($txacc=="account"){
+	 $sql1="select distinct acc_no,acc_desc as kol2,acc_group as kol3 FROM LP_ACC where acc_no like '$acc%' ORDER BY ACC_NO ASC";
+	$hdrtbl='<th>Account No</th>
+            <th>Nama Account</th>
+            <th>Group Account</th>'; 
+	$urutkol="kd_pel";
+	$bargen='';
+ }else{
+	 if( $acc!=""){$whr="acc_no like '$acc%'";}else{$whr="acc_no='xxx'";}
+	 $sql1="select distinct acc_no,acc_sub as kol2,acc_subdesc as kol3 FROM bps_subACC where $whr ORDER BY ACC_NO ASC";
+	 $hdrtbl='<th>Account No</th>
+            <th>Sub Account</th>
+            <th>Description</th>';
+	$urutkol="kd_pel1";
+ }
+ //echo $sql1;
+	$bargen='<tr onclick="javascript:pilih(this);">
+	<td>ALL</td><td>Umum</td><td>Umum</td>
+	</tr>';
+ ?>
+	
+<form id="form1" name="form1" method="post">
+<div class="block-header"><h2>Cari Account</h2>  </div>
+<table id="example" class="table table-bordered table-striped table-hover dataTable js-exportable tabel2">
+    <thead>
+        <tr>
+			<?php echo $hdrtbl; ?>
+			
+        </tr>
+    </thead>
+    <tbody>
+<!--        data ini bisa di loop dari database-->
+<?php
+	$tb_area=odbc_exec($koneksi_lp,$sql1);
+$row=0;
+while($baris1=odbc_fetch_array($tb_area)){ $row++;
+
+?>
+
+        <tr onclick="javascript:pilih(this);">
+			<td><?php echo odbc_result($tb_area,"acc_no");?></td>
+            <td><?php echo odbc_result($tb_area,"kol2");?></td>	
+            <td><?php echo odbc_result($tb_area,"kol3");?></td>		
+        </tr>
+		<?php } ?>    
+		<!--
+<tr onclick="javascript:pilih(this);">
+			<td>All</td>
+            <td>All</td>	
+            <td>All</td>		
+  </tr>	-->	
+    </tbody>
+</table>
+</form>
+</div></div>
+
+<script>
+    function pilih(row){
+      	var kd_pel=row.cells[0].innerHTML;
+		var kd_pel1=row.cells[1].innerHTML;
+		window.opener.parent.document.getElementById("<?php echo $txacc; ?>").value = <?php echo $urutkol; ?>;
+		
+		
+//        menutup pop up
+        window.close();
+    }
+</script>

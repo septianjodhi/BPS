@@ -1,0 +1,753 @@
+<style>
+	.my-custom-scrollbar {
+		position: relative;
+		height: 400px;
+		overflow: auto;
+	}
+	.table-wrapper-scroll-y {
+		display: block;
+	}
+</style>
+<script>
+	function open_childX(url,title,w,h){
+		var left = (screen.width/2)-(w/2);
+		var top = (screen.height/2)-(h/2);
+		w = window.open(url, title, 'toolbar=no, location=no, directories=no, \n\
+			status=no, menubar=no, scrollbar=no, resizabel=no, copyhistory=no,\n\
+			width='+w+',height='+h+',top='+top+',left='+left);
+	};	
+</script>
+<?php
+error_reporting(0);
+session_start();
+$sect=$_SESSION["area"]; 
+$pic=$_SESSION["nama"];
+$pch_sect=explode("-",$sect);
+$dept=$pch_sect[0];
+$sec=$pch_sect[1];
+
+
+if(isset($_POST['delinv']) )
+{	
+	$invdel=$_POST["invdel"];	
+	$pc_inv=explode("|", $invdel);
+	$tb_del1=odbc_exec($koneksi_lp,"delete from bps_kedatangan where inv_no='$pc_inv[0]' and po_no='$pc_inv[1]' ");
+}
+$crlp=odbc_exec($koneksi_lp,"select distinct lp from bps_tmppr");
+?>
+
+<section class="content">
+	<div class="container-fluid">
+		<div class="block-header">
+			<h2>Input Kedatangan</h2>
+		</div>
+
+		<div class="col-sm-8">
+			<div class="row clearfix">
+				<div class="card">
+					<div class="row clearfix">
+						<div class="header">
+							<h2>Record Requirement</h2>
+						</div>
+						<div class="body">
+							<form action="" id="frm_rmk" name="frm_rmk" method="post"  enctype="multipart/form-data">
+								<div class="col-sm-3">
+									<div class="form-group">
+										<label>Pilih Tanggal</label>
+										<div class="form-line">
+											<input type="text"  class="form-control" id="rg_tgl" name="rg_tgl" placeholder="Detail Pencarian" required>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-3"> 
+									<div class="form-group">
+										<label>Jenis Dokumen</label>
+										<div class="form-line">
+											<select class="selectpicker" name="jns_doc" id="jns_doc" required>
+												<option selected="selected" value="">---Pilih Jenis Dok---</option>
+												<option value="po">PO</option>
+												<option value="pr">PR</option>
+											</select>
+										</div>
+									</div>
+								</div>
+								<button type="submit" name="cr_tgl" id="cr_tgl" class="btn bg-purple waves-effect"><i class="material-icons">search</i></button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-sm-4">
+			<div class="card">
+				<div class="header">
+					<h2>Upload Kedatangan<small>Upload Kedatangan Barang dari Supplier</small></h2>
+					<ul class="header-dropdown m-r--5">
+						<li class="dropdown">
+							<a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+								<i class="material-icons">more_vert</i>
+							</a>
+							<ul class="dropdown-menu pull-right">
+								<li><a href="javascript:void(0);">Action</a></li>
+							</ul>
+						</li> </ul>
+					</div>
+					<div class="body">
+						<form role="form" enctype="multipart/form-data" name="form2" id="form2" method="post" action="">
+							<div class="form-group">
+								<label>Open File</label>
+								<div class="form-line">
+									<input type="file" class="form-control" id="file" name="file" placeholder="Cari File" required>
+								</div>
+							</div>
+							<button type="submit" id="upld" name="upld" class="btn bg-orange waves-effect">
+								<i class="material-icons">saves</i>UPLOAD
+							</button>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<?php
+			if(isset($_POST['upld']) ){
+				require_once "excel_reader2.php";
+		$file_name = $_FILES['file']['name']; //nama file (tanpa path)
+		$tmp_name  = $_FILES['file']['tmp_name']; //nama local temp file di server
+		$file_size = $_FILES['file']['size']; //ukuran file (dalam bytes)
+		$file_type = $_FILES['file']['type']; //tipe filenya (langsung detect MIMEnya)
+		$fp1 = fopen($tmp_name, 'r'); // open file (read-only, binary)
+		$fp = fopen($tmp_name, 'r');		
+		$pecah=explode(".",$file_name);
+		$ekstensi=$pecah[1];
+		$extensionList=array("xls","XLS");
+		if(in_array($ekstensi,$extensionList)){		
+			$target = basename($_FILES['file']['name']) ;
+			move_uploaded_file($_FILES['file']['tmp_name'], $target);			 
+			$data = new Spreadsheet_Excel_Reader($_FILES['file']['name'],false);  
+			$baris = $data->rowcount($sheet_index=0);
+			$fixedbaris = $baris;	 
+			
+			$pic=$_SESSION['nama'];
+			for ($i=8; $i<=$fixedbaris; $i++){		
+$kol1=$data->val($i,1); //No
+$kol2=$data->val($i,2); //PR No
+$kol3=$data->val($i,3); //PO No
+$kol4=$data->val($i,4); //No Control
+$kol5=$data->val($i,5); //Part Name
+$kol6=$data->val($i,6); //Part No
+$kol7=$data->val($i,7); //Part Detail
+$kol8=$data->val($i,8); //Part Desc
+$kol9=$data->val($i,9); //Qty PO
+$kol10=$data->val($i,10); //Qty Rcv
+$kol11=$data->val($i,11); //Qty Datang
+$kol12=$data->val($i,12); //Inv No
+$kol13=$data->val($i,13); //Inv Date
+$kol14=$data->val($i,14); //Inv Rcv Date
+$kol15=$data->val($i,15); //Jenis BC
+$kol16=$data->val($i,16); //No BC
+$kol17=$data->val($i,17); //Tanggal BC
+$kol18=$data->val($i,18); //Faktur Pajak
+$kol19=$data->val($i,19); //PPh
+$kol20=$data->val($i,20); //PPn
+
+$qty_sisa=$kol9-$kol10;
+if($kol19==""){$ppn="0";}else{$ppn=$kol19;}
+if($kol20==""){$pph="0";}else{$pph=$kol20;}
+
+if($kol6!=""){
+	$tb_cekqty=odbc_exec($koneksi_lp,"SELECT sum(qty_dtg) as qty_dtg from bps_kedatangan where po_no='$kol3' and no_ctrl='$kol4' and pr_no='$kol2' ");
+	$qty_sdhdtg=odbc_result($tb_cekqty,'qty_dtg');
+	$tot_qty=$qty_sdhdtg+$kol11;
+
+	if($kol9>=$tot_qty ){
+		$sql_updt="INSERT into bps_kedatangan (no_ctrl,part_no,part_nm,part_dtl,part_desc,qty,pr_no,po_no,no_quo,kode_supp,sect_to,pic_updt,tgl_updt,lp,uom,price,
+			curr,account,cccode ,pph,ppn,qty_dtg,inv_no,inv_tgl,rcv_inv_date,no_bc,tgl_bc,jns_bc,faktur_pajak )
+		SELECT a.no_ctrl,a.part_no,a.part_nm,a.part_dtl,a.part_desc,a.qty,a.pr_no,a.po_no,a.no_quo,a.kode_supp,sect,a.pic_updt,a.tgl_updt,a.lp,a.uom,a.price,
+		a.curr,a.account,a.cccode,a.pph,a.ppn,$kol11 as qty_dtg,'$kol12' as inv_no,'$kol13' as inv_tgl,'$kol14' as rcv_inv_date,'$kol16' as no_bc,
+		'$kol17' as tgl_bc,'$kol15' as jns_bc,'$kol18' as faktur_pajak 
+		from bps_podtl a left join bps_pr b on a.pr_no=b.PR_NO and a.no_ctrl=b.no_ctrl where a.po_no='$kol3' and a.no_ctrl='$kol4' and a.pr_no='$kol2' ";
+		$hasil = odbc_exec($koneksi_lp, strtoupper($sql_updt));
+	}
+//echo "<br>lht ".$i.$query1;
+	if(!$hasil){
+		echo "<br>Error ".$i.$sql_updt;
+		print(odbc_error());
+	}else{}
+}
+}
+unlink($_FILES['file']['name']);	
+echo "<script>alert('Data Berhasil Diperbarui');</script>"; 
+}else{ 
+	// echo "<script>alert('Format file harus XLS'); window.location = '?page=form/inpt_supp.php'</script>"; 
+	echo "<script>alert('Format file harus XLS');</script>"; 
+}
+
+}
+
+if(isset($_POST['cr_tgl']))
+{
+	$supp=$_POST['supp'];
+	$jns_doc=$_POST['jns_doc'];
+	if($supp==''){$crsp="";}else{$crsp=" and kode_supp='$supp'";}
+	if($jns_doc==''){$crlp="";}else if($jns_doc=='pr'){$crlp=" and sect='$sect' or lp='$sec' and jns_doc='PR'";}
+	else {$crlp=" and lp='$sec'";}
+
+	$rg_tg=$_POST['rg_tgl'];
+	$rg_tgl=explode("-",$rg_tg);
+	$rg_tgl0=date("Y-m-d",strtotime($rg_tgl[0]))." ".'00:00:00';
+	$rg_tgl1=date("Y-m-d",strtotime($rg_tgl[1]))." ".'23:59:59';
+	$whr_tgl=" and tgl_updt BETWEEN '$rg_tgl0' AND '$rg_tgl1' ";
+	?>
+
+	<div class="row clearfix">
+		<form action="" id="frmcari" name="frmcari" method="post"  enctype="multipart/form-data">
+			<div class="card">
+				<div class="header">
+					<h2>Pilih Data Requirement </h2>
+				</div>
+
+				<div class="row clearfix">
+					<div class="body">
+
+						<div class="col-sm-3">	
+							<div class="form-group">
+								<label>Jenis BC</label>
+								<div class="form-line">
+									<select class="selectpicker"  style="width: 100%;"  name="jnbc" id="jnbc">
+										<option selected="selected" value="">---Pilih Jenis BC---</option>
+										<option value="BC23">BC23</option>
+										<option value="BC27M">BC27M</option>
+										<option value="BC40">BC40</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-sm-2">	
+							<div class="form-group">
+								<label>Nomor BC</label>
+								<div class="form-line">
+									<input type="text" name="nobc" id="nobc" value="" class="form-control" placeholder="Nomor BC">
+								</div>
+							</div>
+						</div>
+
+						<div class="col-sm-2">
+							<div class="form-group">
+								<label>Tanggal BC</label>
+								<div class="form-line">
+									<input type="text" class="form-control datetime" id="tglbc" name="tglbc"  placeholder="Tanggal BC">
+								</div>
+							</div>
+						</div>
+
+						<div class="col-sm-2">	
+							<div class="form-group">
+								<label>Faktur Pajak</label>
+								<div class="form-line">
+									<input type="text" name="fakur" id="fakur" value="" class="form-control" placeholder="No Faktur Pajak">
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-3">	
+							<div class="form-group">
+								<label>PPH</label>
+								<div class="form-line">
+									<select name="pph" id="pph" >
+										<option selected="selected" value="">---Pilih---</option>
+										<option value="0.5">0.5</option>
+										<option value="1.75">1.75</option>
+										<option value="2">2</option>
+										<option value="2.5">2.5</option>
+										<option value="2.65">2.65</option>
+										<option value="3">3</option>
+										<option value="4">4</option>
+										<option value="5">5</option>
+										<option value="10">10</option>
+										<option value="20">20</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+				<div class="row clearfix">
+					<div class="body">
+						<div class="col-sm-3">	
+							<div class="form-group">
+								<label>Invoice No</label>
+								<div class="form-line">
+									<input type="text" name="inv_no" id="inv_no" value="" class="form-control" placeholder="Nomor Invoice" required>
+								</div>
+							</div>
+						</div>
+						<?php
+						if($jns_doc=='pr'){
+							?>
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label>Supplier</label>
+									<div class="form-line">
+										<select class="selectpicker" data-live-search="true" style="width: 100%;"  name="ksupp" id="ksupp" >
+											<option selected="selected" value="">--Supplier--</option>
+											<?php
+											$tb_supp=odbc_exec($koneksi_lp,"select distinct SUPP_NAME,supp_code from lp_supp ");
+											while($tb_supp_code=odbc_fetch_array($tb_supp)){ 
+												$supp=odbc_result($tb_supp,"SUPP_NAME");
+												$kode_supp=odbc_result($tb_supp,"supp_code");
+												echo '<option value="'.$kode_supp.'">'.$supp.'</option>';
+											}
+											?>
+										</select>
+									</div>
+								</div>
+							</div>
+							<?php 
+						}									 
+						?>
+
+						<div class="col-sm-3">
+							<div class="form-group">
+								<label>Invoice date</label>
+								<div class="form-line">
+									<input type="text" class="form-control datetime" id="tgl" name="tgl" placeholder="Tanggal Invoice" required>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-sm-3">
+							<div class="form-group">
+								<label>Invoice Rcv date</label>
+								<div class="form-line">
+									<input type="text" class="form-control datetime" id="tgl_rcv" name="tgl_rcv" placeholder="Tanggal rcv Invoice" required>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row clearfix">
+					<div class="body">
+						<div class="table-wrapper-scroll-y my-custom-scrollbar	">
+							<table id="example" class="table table-bordered table-striped table-hover dataTable tabel2">
+								<thead>
+									<tr >	
+										<td align="center">Pilih Doc</td>
+										<td align="center">Doc No</td>
+										<td align="center">Doc Date</td>
+										<td align="center">Vendor</td>
+										<td align="center">Purchasing</td>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									//(periode='".date("Ym")."' or account in ('1167401','7222404','7122399','7266399','7266302','6266304')) and ;
+									$sq_pr="
+									SELECT jns_doc,po_no as no_doc,min(tgl_updt) as tgl_doc,kode_supp,count(part_no) as jml_part,sum(qty) as qty_order,lp FROM mstr_kdtgn
+									where jns_doc='$jns_doc' $whr_tgl $crlp 
+									group by jns_doc,po_no,kode_supp,lp 
+									order by po_no desc";
+											echo $sq_pr;
+									$tb_po=odbc_exec($koneksi_lp,$sq_pr);
+									$i=0;
+									while($bar_po=odbc_fetch_array($tb_po)){ 
+										$no_doc=odbc_result($tb_po,"no_doc");
+										$lp=odbc_result($tb_po,"lp");
+										$kd_supp=odbc_result($tb_po,"kode_supp");
+										if($kd_supp==''){
+											$supp=$ksupp;
+										}else{
+											$supp=$kd_supp;
+										}
+										$i++;
+										?>
+										<tr>
+											<td>
+												<div class="switch"><label>
+													<input type="checkbox" name="plh[]" id="plh" value="<?php echo $no_doc."|".$lp."|".$kd_supp; ?>" >
+													<span class="lever"></span></label>
+												</div>
+											</td>
+											<td><?php echo $no_doc;?></td>
+											<td><?php echo date("Y-m-d",strtotime(odbc_result($tb_po,"tgl_doc"))); ?></td>
+											<td><?php echo odbc_result($tb_po,"kode_supp"); ?></td>
+											<td><?php echo $lp;  ?></td>
+										</tr>	
+										<?php 
+									}
+								}
+								?>
+								<tr class="odd gradeX">
+									<td align="center" valign="middle" nowrap="nowrap"><input type="checkbox" value="-" ></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<?php 
+					if(isset($_POST['cr_tgl']) ){
+						?>
+						<div class="body">	
+							<button type="submit" id="smpn" name="smpn" class="btn bg-green waves-effect"><i class="material-icons">saves</i>Save</button>	
+						</div>
+					<?php }?>
+				</div>
+			</div>
+			</div>
+	</form>
+			<?php
+			if(isset($_POST['smpn']) ){
+				$bln=date("Ym");
+				$plh=$_POST['plh'];
+				$inv_no=$_POST['inv_no'];
+				$q_pln=$_POST['q_pln'];
+				$pph=$_POST['pph'];
+				$fakur=$_POST['fakur'];
+				$ksupp=$_POST['ksupp'];
+				if($pph==''){$pjk=0;}else{$pjk=$pph;}
+				$count=count($plh);
+				$tgl_inv=date("Y-m-d",strtotime($_POST['tgl']));
+				$tgl_rcv=date("Y-m-d",strtotime($_POST['tgl_rcv']));
+
+				$jnbc=$_POST['jnbc'];
+				$nobc=$_POST['nobc'];
+				$tgl_bc=$_POST['tglbc'];
+				$qpln="";
+				foreach ($plh as $_boxValue2){
+					$np2=explode("|",$_boxValue2);
+					
+											$tb_supp=odbc_exec($koneksi_lp,"select PPN from lp_supp WHERE SUPP_CODE='$np2[2]'");
+											$PPNA=0;
+											while($tb_supp_code=odbc_fetch_array($tb_supp)){ 
+												$PPNA=odbc_result($tb_supp,"PPN");
+												
+											}
+											
+											if($PPNA>=10 && substr($fakur,0,4)!="010." && substr($fakur,0,4)!="011."  && substr($fakur,0,4)!="040."   && substr($fakur,0,4)!="041."  && substr($fakur,0,4)!="070." && substr($fakur,0,4)!="071." && substr($fakur,0,4)!="050." && substr($fakur,0,4)!="051."  && substr($fakur,0,4)!="080."  && substr($fakur,0,4)!="081." && strlen($fakur!=17)){
+												
+													echo "<script>alert('Gagal...Faktur Pajak Salah!');</script>";
+												
+											}else{
+					//Input Kedatangan						
+					$qryinpodtl="insert into bps_kedatangan (part_no, part_nm, part_dtl, part_desc, qty, pr_no, po_no, no_quo, 
+					kode_supp, sect_to, inv_no, inv_tgl, qty_dtg, pic_updt, tgl_updt, lp,price, curr, pph, account, cccode, ppn,
+					uom,rcv_inv_date,no_bc,tgl_bc,jns_bc,no_ctrl,faktur_pajak)
+					select part_no, part_nm, part_dtl, (case when part_desc is null then '' else part_desc end) as part_desc,qty_order as qty,pr_no,po_no,no_quo,(case when kode_supp='' then '$ksupp' else 
+					kode_supp end ) as kode_supp,sect as sect_to, '$inv_no' as inv_no,'$tgl_inv' as inv_tgl,(qty_order-qty_dtg) as qty_dtg,'$pic' as
+					pic_updt,getdate() as tgl_updt,lp,price,curr,'$pjk' as pph,account,cccode,ppn,uom,'$tgl_rcv' as rcv_inv_date,'$nobc' as no_bc,
+					'$tgl_bc' as tgl_bc,'$jnbc' as jns_bc,no_ctrl ,'$fakur' as faktur_pajak	from stok_dtg a where po_no='$np2[0]' and kode_supp='$np2[2]' and (qty_order-qty_dtg)>0 ";
+					// and ppn is not null
+							
+					
+					$tb_crdtpo=odbc_exec($koneksi_lp,$qryinpodtl);
+					$tb_updtbud=odbc_exec($koneksi_lp,"update bps_podtl set status_po='CLOSE' where po_no='$np2[0]' and no_ctrl='$noctrl'");
+					
+											}
+							 echo $qryinpodtl."<br>";
+				}
+				echo "<script>alert('DATA BERHASIL DISIMPAN DENGAN INV NO $inv_no $qryinpodtl');</script>";
+			}
+			?>
+		
+</div>
+<div class="container-fluid">
+	<div class="row clearfix">
+		<div class="card">
+			<form action="" id="frm1" name="frm1" method="post"  enctype="multipart/form-data">
+				<div class="header">
+					<h2>Summary Kedatangan</h2>
+				</div>
+				<div class="row clearfix">
+					<div class="body">
+						<div class="table-responsive">
+							<table id="example" class="table table-bordered table-striped table-hover dataTable js-exportable tabel2">
+								<thead>
+									<tr>
+										<th>NO</th>
+										<th>INV NO</th>
+										<th>PO NO</th>
+										<th>TANGGAL</th>
+										<th>VENDOR</th>
+										<th>PURCHASING</th>
+										<th>TANGGAL PENERIMAAN</th>
+										<th>ACTION</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									$tahun=date("Y")-1;
+									$tgl_awal=$tahun."-01-01";
+									// po_no like '%PO-%'and 
+									$lht_dt="SELECT distinct inv_no,po_no,inv_tgl,kode_supp,lp,min(tgl_updt) as tgl_updt from bps_kedatangan 
+									where (pic_updt='$pic' or lp='$sec') and inv_no not in (select inv_no from bps_vp)
+									group by inv_no,po_no,inv_tgl,kode_supp,lp having min(tgl_updt)>='$tgl_awal' order by tgl_updt desc ";
+									$tb_pr=odbc_exec($koneksi_lp,$lht_dt);
+									// echo $lht_dt;
+									$i=0;
+									while($bar_pr=odbc_fetch_array($tb_pr)){ 
+										$po_no=odbc_result($tb_pr,"po_no");
+										$inv_no=odbc_result($tb_pr,"inv_no");
+										$lp=odbc_result($tb_pr,"lp");
+										$i++;
+										?>	
+										<tr onclick="javascript:pilih(this);" >
+											<td><?php echo $i; ?></td>
+											<td><?php echo $inv_no; ?></td>
+											<td><?php echo $po_no; ?></td>
+											<td><?php echo date("Y-m-d",strtotime(odbc_result($tb_pr,"inv_tgl"))); ?></td>
+											<td><?php echo odbc_result($tb_pr,"kode_supp"); ?></td>
+											<td><?php echo $lp;  ?></td>
+											<td><?php echo date("Y-m-d",strtotime(odbc_result($tb_pr,"tgl_updt"))); ?></td>
+											<td>
+												<a href="##"><i onclick="open_child('select/rev_dtg.php?inv=<?php echo $inv_no;?>&lp=<?php echo $lp;?>&nopo=<?php echo $po_no;?>&pic=<?php echo $pic;?>&sesi=<?php echo $_SESSION['lok'];?>','Edit INV <?php echo $inv_no;?>','800','500'); return false;" class="material-icons">edit</i></a>
+												<a href="#" onClick="deleteinv()" class="material-icons">delete</i></a>
+											</td>
+										</tr>	
+										<?php 
+									}
+									?>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</form> 
+		</div>
+	</div>
+</div>
+
+<div class="container-fluid">
+	<div class="row clearfix">
+		<div class="card">
+			<form action="" id="frm1" name="frm1" method="post"  enctype="multipart/form-data">
+				<div class="header">
+					<h2>Record Incoming</h2>
+				</div>
+				<div class="body">
+					<div class="row clearfix">
+						<div class="col-sm-12">
+							<div class="col-sm-3"> 
+								<div class="form-group">
+									<label>Purchasing</label>
+									<div class="input-group">
+										<select class="selectpicker" style="width: 100%;"  name="lp" id="lp" placeholder="Choose Purchasing" required>
+											<option selected="selected" value="">-Choose Purchasing-</option>
+											<?php
+											$qlp="select distinct lp from bps_podtl order by lp";
+											$tb_lp=odbc_exec($koneksi_lp,$qlp);
+											while($bar_qlp=odbc_fetch_array($tb_lp)){
+												$dt_lp=odbc_result($tb_lp,"lp");
+												echo '<option value="'.$dt_lp.'">'.$dt_lp.'</option>';
+											}				
+											?>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label>Pilih Tanggal PO</label>
+									<div class="form-line">
+										<input type="text"  class="form-control" id="rg_tgl" name="rg_tgl" placeholder="Detail Pencarian" >
+									</div>
+								</div>
+							</div>
+
+							<div class="col-sm-3">	
+								<div class="form-group">
+									<label>Detail Pencarian</label>
+									<div class="input-group">
+										<select class="selectpicker" style="width: 100%;"  name="cmd_cari" id="cmd_cari" >
+											<option selected="selected" value="">---Pilih Kolom---</option>
+											<option value="a.term">TERM</option>
+											<option value="a.periode">PERIODE</option>
+											<option value="a.no_ctrl">CONTROL NO</option>											
+											<option value="a.po_no">PO NO</option>
+											<option value="b.inv_no">INV NO</option>
+											<option value="a.pr_no">PR NO</option>
+											<option value="a.kode_supp">KODE SUPP</option>
+											<option value="b.sect_to">SECTION ORDER</option>
+										</select>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-3">	
+								<div class="form-group">
+									<label>Input Pencarian</label>
+									<div class="form-line">
+										<input type="text"  class="form-control" data-role="tagsinput" id="txt_cari" name="txt_cari" placeholder="Detail Pencarian">
+									</div> 
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-12">
+							<div class="col-sm-4">
+								<button type="submit" name="cr_b" id="cr_b" class="btn bg-purple btn-circle-lg waves-effect waves-circle waves-float"><i class="material-icons">search</i> </button>
+							</div>
+						</div>
+
+						<div class="col-sm-12">
+							<div class="table-responsive">
+								<table id="example" class="table table-bordered table-striped table-hover dataTable js-exportable tabel2">
+									<thead>
+										<tr>
+											<th>NO</th>
+											<!-- <th>TERM</th> -->
+											<th>PERIODE</th>
+											<th>PO NO</th>
+											<th>PR NO</th>
+											<th>CONTROL NO</th>
+											<th>PART NO</th>
+											<th>PART NAME</th>
+											<th>PART DETAIL</th>
+											<th>PART DESC</th>
+											<th>UOM</th>
+											<th>PRICE</th>
+											<th>CURR</th>
+											<th>QTY PO</th>
+											<th>INV NO</th>
+											<th>TANGGAL INV</th>
+											<th>QTY DATANG</th>
+											<th>VENDOR</th>
+											<th>PURCHASING</th>
+										</tr>
+									</thead>
+									<tbody>
+										<?php
+										if(isset($_POST['cr_b']) )
+										{	
+											$lp=$_POST['lp'];
+
+											$cmd_cari=$_POST['cmd_cari'];
+											$txt_cari=str_replace(" ","",$_POST['txt_cari']);
+											if($txt_cari==""){
+												$whr=""; 
+											}
+											else{
+												$whr=" and replace($cmd_cari,' ','') like '%$txt_cari%'";
+											}
+
+											$rg_tg=$_POST['rg_tgl'];
+											$rg_tgl=explode("-",$rg_tg);
+											$rg_tgl0=date("Y-m-d",strtotime($rg_tgl[0]))." 00:00:00";
+											$rg_tgl1=date("Y-m-d",strtotime($rg_tgl[1]))." 23:59:59";
+											if($txt_cari!=""){												
+												$lht_dt="SELECT a.term,a.periode,a.pr_no,a.po_no,a.no_ctrl,a.part_no,a.part_nm,a.part_dtl,a.part_desc,a.qty,a.uom,a.price,a.curr,a.kode_supp,b.inv_no,
+												b.inv_tgl,isnull(qty_dtg,0) as qty_dtg	FROM bps_podtl a 
+												left join bps_kedatangan b on a.po_no=b.po_no and a.pr_no=b.pr_no and a.no_ctrl=b.no_ctrl and a.kode_supp=b.kode_supp
+												where a.po_no like '%PO-%' and a.lp='$lp' $whr
+												order by po_no asc";
+											} else {
+												$lht_dt="SELECT a.term,a.periode,a.pr_no,a.po_no,a.no_ctrl,a.part_no,a.part_nm,a.part_dtl,a.part_desc,a.qty,a.uom,a.price,a.curr,a.kode_supp,b.inv_no,
+												b.inv_tgl,isnull(qty_dtg,0) as qty_dtg	FROM bps_podtl a 
+												left join bps_kedatangan b on a.po_no=b.po_no and a.pr_no=b.pr_no and a.no_ctrl=b.no_ctrl and a.kode_supp=b.kode_supp
+												where a.po_no like '%PO-%' and a.lp='$lp' and a.tgl_updt between '$rg_tgl0' and '$rg_tgl1'
+												order by po_no asc";
+											}
+											// $lht_dt="SELECT distinct inv_no,po_no,inv_tgl,kode_supp,lp,min(tgl_updt) as tgl_updt from bps_kedatangan where (pic_updt='$pic' or lp='$sec') and inv_no not in (select inv_no from bps_vp)
+											// group by inv_no,po_no,inv_tgl,kode_supp,lp order by tgl_updt desc ";
+											$tb_pr=odbc_exec($koneksi_lp,$lht_dt);
+											// echo $lht_dt;
+											$i=0;
+											while($bar_pr=odbc_fetch_array($tb_pr)){ 
+												$po_no=odbc_result($tb_pr,"po_no");
+												$inv_no=odbc_result($tb_pr,"inv_no");
+												// $lp=odbc_result($tb_pr,"lp");
+												$inv_tgl=$bar_pr['inv_tgl'];
+												$i++;
+												?>	
+												<tr onclick="javascript:pilih(this);" >
+													<td><?= $i; ?></td>
+													<!-- <td><?= $bar_pr['term']; ?></td> -->
+													<td><?= $bar_pr['periode']; ?></td>
+													<td><?= $po_no; ?></td>
+													<td><?= $bar_pr['pr_no']; ?></td>
+													<td><?= $bar_pr['no_ctrl']; ?></td>
+													<td><?= $bar_pr['part_no']; ?></td>
+													<td><?= $bar_pr['part_nm']; ?></td>
+													<td><?= $bar_pr['part_dtl']; ?></td>
+													<td><?= $bar_pr['part_desc']; ?></td>
+													<td><?= $bar_pr['uom']; ?></td>
+													<td><?= $bar_pr['price']; ?></td>
+													<td><?= $bar_pr['curr']; ?></td>
+													<td><?= $bar_pr['qty']; ?></td>
+													<td><?= $inv_no; ?></td>
+													<td><?php if($inv_tgl!=""){ echo date("Y-m-d",strtotime($inv_tgl)); } ?></td>
+													<td><?= $bar_pr['qty_dtg']; ?></td>
+													<td><?= odbc_result($tb_pr,"kode_supp"); ?></td>
+													<td><?= $lp; ?></td>
+												</tr>	
+												<?php 
+											}
+										}
+										?>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+</div>
+</section>
+
+
+<div class="modal fade" id="mddel" tabindex="1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header"><h4 class="modal-title" id="defaultModalLabel">HAPUS KEDATANGAN</h4></div>
+			<form action="" id="frmdel" name="frmdel" method="post"  enctype="multipart/form-data">
+				<div class="modal-body">
+					APAKAH ANDA YAKIN INGIN MENGHAPUS PO INI DARI DAFTAR PENERIMAAN? <input type="text" readonly class="form-control" data-role="tagsinput" id="invdel" name="invdel" placeholder="INV NO" required>
+					<div class="modal-footer">
+						<button type="submit" id="delinv" name="delinv" class="btn btn-link waves-effect">HAPUS</button>
+						<button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+
+	<script>
+		function pilih(row){
+			var kd_pel1=row.cells[1].innerHTML;
+			var kd_pel2=row.cells[2].innerHTML;
+
+			document.frmdel.invdel.value=kd_pel1+"|"+kd_pel2;
+		};
+		function deleteinv(){
+			$('#mddel').modal('show');
+		};
+
+		$(function() {
+			$('input[name="rg_tgl"]').daterangepicker({
+				opens: 'left'
+			}, function(start, end, label) {
+				console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+			});
+		});
+		$(document).ready(function()
+		{
+
+			$('.periodemn').bootstrapMaterialDatePicker({
+				format: 'YYYYMM', minDate : new Date(),
+				clearButton: true,
+				weekStart: 0,
+				time: false
+			});	
+			$('.periodeflex').bootstrapMaterialDatePicker({
+				format: 'YYYYMM',
+				clearButton: true,
+				weekStart: 0,
+				time: false
+			});	
+		});
+	</script>

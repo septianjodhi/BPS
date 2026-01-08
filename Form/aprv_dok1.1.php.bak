@@ -1,0 +1,228 @@
+<script>
+function open_childX(url,title,w,h){
+        var left = (screen.width/2)-(w/2);
+        var top = (screen.height/2)-(h/2);
+        w = window.open(url, title, 'toolbar=no, location=no, directories=no, \n\
+        status=no, menubar=no, scrollbar=no, resizabel=no, copyhistory=no,\n\
+        width='+w+',height='+h+',top='+top+',left='+left);
+		
+  };	
+</script>
+
+
+<?php $sect= $_SESSION["area"]; 
+$pic=$_SESSION["nama"];
+$akses=$_SESSION["akses"];
+$user=$_SESSION["user"];
+$pch_sec=explode("-",$sect);
+$whr="and sect='-'";
+$perinow=date("Ym");
+if(isset($_GET['prv'])){
+	switch ($_GET['prv']){
+		case 'section':
+		$whr=" no_aprv<4 and sect='$sect' and CHARINDEX('APP_PR','$akses')>0";break;
+		case 'mgr':
+		//$whr="status is null and sect='".$pch_sec[0]."-ALL' and pic_plan='$pic' and no_doc in (select no_doc from bps_approve where status='close' and no_aprv=1) and (no_aprv='2' OR no_aprv='3')";break;
+		$whr="status is null and pic_plan='$pic' and no_doc in (select no_doc from bps_approve where status='close' and no_aprv<(select min(no_aprv) from bps_approve where pic_plan='$pic')) and no_aprv<7";break;
+		case 'verified':
+		//$whr="status is null and no_doc in (select no_doc from bps_approve where status='close' and no_aprv=1)";break;
+		$whr="status is null and sect='SAMI-ALL' and no_aprv>6 and pic_plan='$pic' and no_doc in (select no_doc from bps_approve where status='close' and no_aprv<4)";break;
+		default :
+		$whr="status is null and sect='SAMI-ALL' and pic_plan='$pic'";break;
+	}
+}
+?>
+ <section class="content">
+ <div class="container-fluid">
+	<div class="block-header">
+    <h2>APPROVE <?php echo strtoupper($sect); ?></h2>
+    </div>
+	<div class="row clearfix">
+    <div class="card">				
+	<div class="header">
+	 <h2>Record Document Approve<small>Lihat data ApproveA</small></h2>
+	</div>
+
+
+
+	<form role="form"  name="frm" id="frm" method="post" action="" enctype="multipart/form-data">
+	
+	<?php if($_GET['prv']=='verified' and $user=='RMU'){?>
+		<div class="col-sm-2">
+		<div class="form-group">
+		<label>Range Tanggal</label>
+		<div class="form-line">
+		<input type="text"  class="form-control" id="rg_tgl" name="rg_tgl" placeholder="Detail Pencarian" required>
+		</div>		
+        </div></div>
+		
+		<div class="col-sm-3">
+		<div class="form-group">
+		<label>Section</label>
+		<div class="form-line">
+		<select class="selectpicker" data-live-search="true" style="width: 100%;"  name="sectu" id="sectu" >
+		<option selected="selected" value="">--Pilih Section--</option>
+		<?php
+		$cr_sect="select DISTINCT sect from bps_approve where sect not like '%ALL%' and no_aprv=1 order by sect asc";
+		$tb_sect=odbc_exec($koneksi_lp,$cr_sect);
+		while(odbc_fetch_array($tb_sect)){ 
+		$plh_sect=odbc_result($tb_sect,"sect");
+		echo '<option value="'.$plh_sect.'">'.$plh_sect.'</option>';
+		}?>	
+		</select>
+		</div>		
+        </div></div>
+	<?php }?>
+		<div class="col-sm-3">
+		<div class="form-group">
+		<label>Status</label>
+		<div class="input-group">
+		<div class="form-line">
+		<select class="selectpicker" data-live-search="true" style="width: 100%;"  name="cr_status" id="cr_status">
+		<option value="">--Pilih Status--</option>
+		<option value='CHECKED'>SUDAH CHECK</option>
+		<option value='BLMCHECKED'>BELUM CHECK</option>
+		</select>
+		</div>
+		<span class="input-group-addon">
+        <button type="submit" name="cr_dt" id="cr_dt" class="btn bg-purple waves-effect"><i class="material-icons">search</i> </button>
+		</span></div></div></div>
+	
+	
+	<div class="row clearfix">
+	<div class="col-sm-12">
+	<div class="body">
+    <div class="table-responsive">
+<table id="example" class="table table-bordered table-striped table-hover dataTable js-exportable tabel2">
+<thead>
+<tr>
+<th>No</th>
+<th>Section</th>	
+<th>Jenis Doc.</th>
+<th>Item Doc.</th>	
+<th>No Doc.</th>
+<th>PIC Plan</th>
+<th>Status</th>
+<th>Action</th>
+
+</tr>
+    </thead>
+	</form>
+
+	
+
+    <tbody>
+<?php
+if(isset($_POST['cr_dt'])){
+//==================================================================Cek Status=======================	
+$status=$_POST['cr_status'];
+if($status=='CHECKED' and $user=='RMU'){
+$whrfil=" and status='FINISH' and no_aprv>=7";}
+elseif($status=='CHECKED' and $user!='RMU'){
+$whrfil=" and (status='Close' or status='FINISH')";}
+elseif($status=='BLMCHECKED' and $user=='RMU'){
+//$whrfil=" and status is NULL and no_doc in (select no_doc from bps_approve where (status='close' and no_aprv=1) or no_doc like '%FIN%') and no_aprv=2";}
+$whrfil=" and no_doc in (select no_doc from bps_approve where (no_aprv<4 and (status='close' or (status is null and sect='FA-FIN')))) and no_aprv>7 ";}
+elseif($status=='BLMCHECKED' and $user!='RMU'){
+$whrfil=" and status is null and no_aprv<4";}
+else{$whrfil=" and status is null and no_aprv=1";}
+//==================================================================Cek Status=======================
+
+if($_GET['prv']=='verified' and $user=='RMU'){$sectu=$_POST['sectu'];
+$pch_sectu=explode("-",$sectu);
+if($sectu==''){$crsect='';}else{
+$crsect=" and no_doc like '%$sectu%'";}
+}else{}
+
+if($_GET['prv']=='verified' and $user=='RMU'){$rg_tg=$_POST['rg_tgl'];
+$rg_tgl=explode("-",$rg_tg);
+$rg_tgl0=date("Y-m-d",strtotime($rg_tgl[0]));
+$rg_tgl1=date("Y-m-d",strtotime($rg_tgl[1]));
+$whrtgl=" tgl_prepaire BETWEEN '".$rg_tgl0." 00:00:00.000' AND '".$rg_tgl1." 23:59:59.999'";
+}else{}
+
+if($_GET['prv']=='verified' and $user=='RMU'){
+	$sq_acc="SELECT distinct sect,jns_doc,status,no_doc,pic_plan,'RMU' as initial,no_aprv,approve from bps_approve where $whrtgl $crsect $whrfil order by jns_doc,no_doc asc";
+}else{
+$sq_acc="SELECT * from bps_approve where $whr $whrfil order by no_doc asc";}
+$tb_acc=odbc_exec($koneksi_lp,$sq_acc);
+//echo $sq_acc;
+$row=0;
+while($baris1=odbc_fetch_array($tb_acc)){ $row++;
+$jns_doc=odbc_result($tb_acc,"jns_doc");
+$stts=odbc_result($tb_acc,"status");
+$no_doc=odbc_result($tb_acc,"no_doc");
+$pic_plan=odbc_result($tb_acc,"pic_plan");
+$initial=odbc_result($tb_acc,"initial");
+$no_aprv=odbc_result($tb_acc,"no_aprv");
+$sect_user=odbc_result($tb_acc,"sect");
+//$linkapp="template.php?plh=select/aprv1.php&j=$jns_doc&nd=$no_doc&pp=$pic_plan";
+//$linkapp="template.php?plh=select/list_nodoc.php";
+				?>	
+				<tr  onclick="javascript:pilih(this);" >
+<td><?php echo /*odbc_result($tb_acc,"no_aprv")*/ $row; ?></td>
+<td><?php //echo odbc_result($tb_acc,"sect"); ?>
+<?php if($_GET['prv']=='verified' and $user=='RMU'){echo $sectu;}else{echo $sect;} ?></td>
+<td><?php echo $jns_doc; ?></td>
+<td><?php echo odbc_result($tb_acc,"approve"); ?></td>
+<td><?php echo $no_doc; ?></td>
+<td><?php echo $pic_plan; ?></td>
+<td><?php echo $stts; ?></td>
+<td>
+<?php //if($status=='BLMCHECKED'){?>
+<button type="button" class="btn bg-green waves-effect" onclick="open_child('select/aprv_<?php echo $jns_doc?>.php?nomor=<?php echo $row;?>&nodoc=<?php echo $no_doc;?>&jnsdok=<?php echo $jns_doc;?>&noaprv=<?php echo $no_aprv;?>&initial=<?php echo $initial;?>&picplan=<?php echo $pic_plan;?>&area=<?php echo $sect;?>&stts=<?php echo $status;?>','Lihat Detail <?php echo $no_doc;?>','800','500'); return false;"><i class="material-icons">visibility</i>
+</button>
+<?php 
+//}
+?>
+</td>
+</tr>
+<?php 
+}}
+?>	
+</tbody>
+<tfoot>
+<tr>	
+</tr>
+</tfoot>
+</table>
+
+
+
+</div>
+</div></div>	
+</div>
+
+
+</div>	
+</div></div>           
+ </div>
+ </section>
+ 
+ <script>
+ $(function() {
+  $('input[name="rg_tgl"]').daterangepicker({
+    opens: 'left'
+  }, function(start, end, label) {
+    console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+  });
+});
+
+		$(document).ready(function()
+		{
+			
+		$('.periodemn').bootstrapMaterialDatePicker({
+        format: 'YYYYMM', minDate : new Date(),
+        clearButton: true,
+        weekStart: 0,
+        time: false
+    });	
+	$('.periodeflex').bootstrapMaterialDatePicker({
+        format: 'YYYYMM',
+        clearButton: true,
+        weekStart: 0,
+        time: false
+    });	
+			});
+</script>
+ 

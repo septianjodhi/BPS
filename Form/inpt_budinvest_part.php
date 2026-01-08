@@ -1,0 +1,667 @@
+<script>
+	function open_child(url,title,w,h){
+		var left = (screen.width/2)-(w/2);
+		var top = (screen.height/2)-(h/2);
+		w = window.open(url, title, 'toolbar=no, location=no, directories=no, \n\
+			status=no, menubar=no, scrollbar=no, resizabel=no, copyhistory=no,\n\
+			width='+w+',height='+h+',top='+top+',left='+left);
+	};	
+	function cr_nm(url,title,w,h){
+		var nik=document.form1.account.value;
+		var left = (screen.width/2)-(w/2);
+		var top = (screen.height/2)-(h/2);
+		w = window.open(url+'&ac='+nik, title, 'toolbar=no, location=no, directories=no, \n\
+			status=no, menubar=no, scrollbar=no, resizabel=no, copyhistory=no,\n\
+			width='+w+',height='+h+',top='+top+',left='+left);		
+	};
+	function cr_part(url,title,w,h){
+		var pno=document.form1.part_no.value;
+		var pnd=document.form1.part_nm.value;
+		var peri=document.form1.del_plan.value;
+		var lp=document.form1.lp.value;
+		var left = (screen.width/2)-(w/2);
+		var top = (screen.height/2)-(h/2);
+		w = window.open(url+'&pno='+pno+'&pnd='+pnd+'&p='+peri+'&lp='+lp, title, 'toolbar=no, location=no, directories=no, \n\
+			status=no, menubar=no, scrollbar=no, resizabel=no, copyhistory=no,\n\
+			width='+w+',height='+h+',top='+top+',left='+left);
+		// w = window.open(url, title, 'toolbar=no, location=no, directories=no, \n\
+		// 	status=no, menubar=no, scrollbar=no, resizabel=no, copyhistory=no,\n\
+		// 	width='+w+',height='+h+',top='+top+',left='+left);
+	};
+
+	function cr_ctrl(url,title,w,h){
+		var pno=document.form1.term.value;
+		var pnd=document.form1.periode.value;
+		var jns_bud=document.form1.jns_bud.value;
+		var pernow = new Date();
+		var nperi=pernow.getFullYear()+''+("0"+(pernow.getMonth()+1)).slice(-2);
+		var balp=parseInt(pnd)-parseInt(nperi);
+	 // alert(balp);
+	 if(pno=="" || balp<0){alert("Term Belum dipilih Atau Periode Kurang dari tanggal Sekarang");}else{
+	 	var left = (screen.width/2)-(w/2);
+	 	var top = (screen.height/2)-(h/2);
+	 	w = window.open(url+'&t='+pno+'&p='+pnd+'&k='+jns_bud, title, 'toolbar=no, location=no, directories=no, \n\
+	 		status=no, menubar=no, scrollbar=no, resizabel=no, copyhistory=no,\n\
+	 		width='+w+',height='+h+',top='+top+',left='+left);	
+	 }
+	};
+</script>
+<?php 
+$pic_updt=$_SESSION['nama'];
+$sect=$_SESSION["area"];
+$user=$_SESSION["user"];
+$aryakses=explode(",",$_SESSION["akses"]);
+?>
+<section class="content">
+	<div class="container-fluid">
+		<div class="block-header">
+			<h2>MASTER PART BUDGET INVEST</h2>
+		</div>
+
+		<div class="row clearfix">
+			<div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+				<div class="card">
+					<div class="header">
+						<h2>INPUT<small>Manual Input Part Budget Invest</small></h2>
+					</div>
+					<div class="body">
+						<form role="form"  name="form1" id="form1" method="post" class="step_with_validation" action="">
+							<h3>STEP 1</h3>
+							<fieldset>
+								<div class="col-md-12">
+									<div class="col-md-2">
+										<div class="form-group">
+											<label>Section</label>
+											<div class="form-line">
+												<input type="text" class="bg-grey form-control" name="sect" id="sect" required readonly>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="form-group">
+											<label>No Control Group</label>
+											<div class="form-line">
+												<input type="text" class="bg-grey form-control" name="no_ctrl_g" id="no_ctrl_g" required >
+											</div>
+										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="form-group">
+											<label>No Control Part</label>
+											<div class="form-line">
+												<input type="text" class="bg-grey form-control" name="no_ctrl_p" id="no_ctrl_p" required >
+											</div>
+										</div>
+									</div>
+									<div class="col-md-4">
+										<div class="form-group">
+											<label>Equipment name</label>
+											<div class="form-line">
+												<input type="text" class="bg-grey form-control" name="equipment" id="equipment" required>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-12">
+									<div class="col-md-2">
+										<div class="form-group">
+											<label>Term</label>
+											<div class="form-line">
+												<input type="text" class="bg-grey form-control" name="term" id="term" required >
+											</div>
+										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="form-group">
+											<label>Periode Order Plan</label>
+											<div class="form-line">
+												<input type="text" class="bg-grey form-control" id="order_plan" name="order_plan"  placeholder="Delivery Plan" required>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="form-group">
+											<label>Periode Delivery Plan</label>
+											<div class="form-line">
+												<input type="text" class="bg-grey form-control" id="del_plan" name="del_plan" placeholder="Delivery Plan" required>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-4">										
+										<div class="form-group">
+											<label>Purchasing</label>
+											<div class="input-group">
+												<select class="selectpicker" style="width: 100%;"  name="lp" id="lp" placeholder="Choose Purchasing" required>
+													<option selected="selected" value="">-Choose Purchasing-</option>
+													<?php
+													$qlp="select * from bps_lp order by kd_lp";
+													$tb_lp=odbc_exec($koneksi_lp,$qlp);
+													while($bar_qlp=odbc_fetch_array($tb_lp)){
+														$dt_lp=odbc_result($tb_lp,"kd_lp");
+														echo '<option value="'.$dt_lp.'">'.$dt_lp.'</option>';
+													}				
+													?>
+												</select>
+											</div>
+										</div>
+									</div>
+								</div>
+							</fieldset>
+							<h3>STEP 2</h3>
+							<fieldset>
+								<div class="col-md-12">
+									<div class="col-md-3">	
+										<div class="form-group">
+											<label>Part No</label>
+											<div class="input-group">
+												<div class="form-line">
+													<input type="text" class="form-control" id="part_no" name="part_no" placeholder="Part No" required readonly>
+												</div>
+												<span class="input-group-addon">
+													<button type="button" class="btn bg-purple waves-effect"  onclick="cr_part('template.php?plh=select/plh_partbud.php','Data Conveyor','800','500'); return false;"><i class="material-icons">search</i> </button>
+												</span>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-3">	
+										<div class="form-group">
+											<label>Part Name</label>
+											<div class="form-line">
+												<input type="text" class="form-control bg-grey" id="part_nm" name="part_nm" placeholder="Nama Part" required>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<div class="form-group">
+											<label>Part Detail</label>
+											<div class="form-line">
+												<input type="text" class="form-control bg-grey" id="part_dtl" name="part_dtl" placeholder="Detail Part" >
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-12">
+									<div class="col-md-3">
+										<div class="form-group">
+											<label>Qty</label>
+											<div class="form-line">
+												<input type="number" class="form-control" id="qty" name="qty" placeholder="qty_part" required>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="form-group">
+											<label>UOM</label>
+											<div class="form-line">
+												<input type="text" class="form-control bg-grey" id="uom" name="uom" placeholder="uom_part" required>
+											</div>
+										</div>
+									</div>
+									<div class="col-sm-3"> 
+										<div class="form-group">
+											<label>Currency</label>
+											<div class="form-line">
+												<input type="text" class="form-control bg-grey" id="curr" name="curr" placeholder="curr" required>
+											</div>
+										</div>
+									</div>
+									<div class="col-sm-3">
+										<div class="form-group">
+											<label>Price</label>
+											<div class="form-line">
+												<input type="text" class="form-control bg-grey" id="price" name="price" placeholder="price" required >
+											</div>
+										</div>
+									</div>
+									<button type="submit" id="smpn" name="smpn" class="btn bg-green waves-effect"><i class="material-icons">saves</i>SIMPAN</button>		 
+									<button type="reset" id="reset" name="reset" class="btn bg-red waves-effect"><i class="material-icons">delete</i>Clear</button>	
+								</div>
+							</fieldset> 
+							<!-- <h3>FINISH</h3>
+							<fieldset>
+								<div class="col-sm-4">
+									<div class="form-group">
+										<label>LT Quotation</label>
+										<div class="form-line">
+											<input type="number" class="form-control" id="lt_quo" name="lt_quo" placeholder="LT Quotation" required>
+										</div>
+									</div>
+									<div class="form-group">
+										<label>LT PR</label>
+										<div class="form-line">
+											<input type="number" class="form-control" id="lt_pr" name="lt_pr" placeholder="LT PR" required>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-4"> 
+									<div class="form-group">
+										<label>LT PO</label>
+										<div class="form-line">
+											<input type="number" class="form-control" id="lt_po" name="lt_po" placeholder="LT PO" required>
+										</div>
+									</div>
+									<div class="form-group">
+										<label>LT Arrival</label>
+										<div class="form-line">
+											<input type="number" class="form-control" id="lt_datang" name="lt_datang" placeholder="LT Arrival" required>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-4"> 
+									<div class="form-group">
+										<label>LT VP</label>
+										<div class="form-line">
+											<input type="number" class="form-control" id="lt_vp" name="lt_vp" placeholder="LT VP" required>
+										</div>
+									</div>
+									<button type="submit" id="smpn" name="smpn" class="btn bg-green waves-effect"><i class="material-icons">saves</i>SIMPAN</button>		 
+									<button type="reset" id="reset" name="reset" class="btn bg-red waves-effect"><i class="material-icons">delete</i>Clear</button>	
+								</div>
+							</fieldset> -->
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+				<div class="card">
+					<div class="header">
+						<h2>UPLOAD<small>Upload Part Budget Invest</small></h2>
+					</div>
+					<div class="body">
+						<form role="form" enctype="multipart/form-data" name="form2" id="form2" method="post" action="">
+							<div class="row clearfix">
+								<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+									<div class="form-group">
+										<label>Open File</label>
+										<div class="form-line">
+											<input type="file" class="form-control" id="file" name="file" placeholder="Cari File" required>
+										</div>
+									</div>
+									<button type="submit" id="upld" name="upld" class="btn bg-orange waves-effect">
+										<i class="material-icons">file_upload</i>Upload Data
+									</div>
+									<?php
+									if(isset($_POST['smpn'])){
+										$term=$_POST['term'];
+										$no_ctrl_g=$_POST['no_ctrl_g'];
+										$no_ctrl_p=$_POST['no_ctrl_p'];
+										$sect=$_POST['sect'];
+										$order_plan=$_POST['order_plan'];
+										$del_plan=$_POST['del_plan'];
+										$equipment=$_POST['equipment'];
+										$part_no=$_POST['part_no'];
+										$part_nm=$_POST['part_nm'];
+										$part_dtl=$_POST['part_dtl'];
+										$qty=$_POST['qty'];
+										$uom=$_POST['uom'];
+										$price=$_POST['price'];
+										$curr=$_POST['curr'];
+										$lp=$_POST['lp'];
+										// $lt_quo=$_POST['lt_quo'];
+										// $lt_pr=$_POST['lt_pr'];
+										// $lt_po=$_POST['lt_po'];
+										// $lt_datang=$_POST['lt_datang'];
+										// $lt_vp=$_POST['lt_vp'];
+
+										$updt="update bps_budinvest_dtl
+										set lp='$lp',
+										part_no='$part_no',
+										part_nm='$part_nm',
+										part_dtl='$part_dtl',
+										uom='$uom',
+										qty=$qty,
+										price=$price,
+										curr='$curr',
+										pic_updt='$pic_updt',
+										tgl_updt=getdate()
+										where no_ctrl='$no_ctrl_g' and no_ctrl_bud='$no_ctrl_p' ";
+										// echo $updt;
+										$hasil = odbc_exec($koneksi_lp, $updt);
+										echo "<script>alert('Data Berhasil di Diperbarui'); window.location = '?page=form/inpt_budinvest_part.php'</script>";
+
+									}
+									if(isset($_POST['upld']) )
+									{
+										require_once "excel_reader2.php";
+									// echo "<script>alert('upload data');</script>"; 								
+									$file_name = $_FILES['file']['name'];// nama file (tanpa path)								
+									$tmp_name  = $_FILES['file']['tmp_name']; //nama local temp file di server								
+									$file_size = $_FILES['file']['size']; //ukuran file (dalam bytes)								
+									$file_type = $_FILES['file']['type']; //tipe filenya (langsung detect MIMEnya)		
+									$fp1 = fopen($tmp_name, 'r'); // open file (read-only, binary)
+									$fp = fopen($tmp_name, 'r');		
+									$pecah=explode(".",$file_name);
+									$ekstensi=$pecah[1];
+									$extensionList=array("xls","XLS");
+									if(in_array($ekstensi,$extensionList)){		
+										$target = basename($_FILES['file']['name']) ;
+										move_uploaded_file($_FILES['file']['tmp_name'], $target);			 
+										$data = new Spreadsheet_Excel_Reader($_FILES['file']['name'],false);  
+										$baris = $data->rowcount($sheet_index=0);
+										$fixedbaris = $baris;
+										$section=$data->val(2,2);
+										$baris_data=$fixedbaris-7;
+										for ($i=8; $i<=$fixedbaris; $i++){
+											$kolJ1=$data->val($i,11); // Qty Order
+											$kolC1=$data->val($i,4); // No Control
+											if($kolJ1!=""){
+												$del_part=odbc_exec($koneksi_lp, "delete from bps_budinvest_dtl where no_ctrl='$kolC1'") ;
+											}
+										}
+										
+										for ($i=8; $i<=$fixedbaris; $i++)
+										{								
+											// $kolG=str_replace(",","",$data->val($i,7));//Qty											
+											// $kolH=str_replace(",","",$data->val($i,8));//Price											
+
+											// $kolA=$data->val($i,1); // No
+											$kolA=$data->val($i,2); // Term
+											$kolB=$data->val($i,3); // CIP No
+											$kolC=$data->val($i,4); // No Control
+											$kolD=$data->val($i,5); // Order Plan
+											$kolE=$data->val($i,6); // Delivery Plan
+											$kolF=$data->val($i,7); // Budget Group
+											$kolG=$data->val($i,8); // Qty Ori
+											$kolH=$data->val($i,9); // Price Ori
+											$kolI=$data->val($i,10); // Part No
+											$kolJ=$data->val($i,11); // Qty Order
+
+
+											$no_ctrl_bud=$kolC;
+											$cr_part=odbc_exec($koneksi_lp, "SELECT top 1 * FROM bps_part WHERE part_no='$kolI' order by tgl_updt desc");											
+											$part_dtl=odbc_result($cr_part, "part_dtl");
+											$part_nm=odbc_result($cr_part, "part_nm");
+											$curr=odbc_result($cr_part, "curr");
+											//$curr="USD";
+											$uom=odbc_result($cr_part, "uom");
+											$lp=odbc_result($cr_part, "lp");
+											$price_periode="price".(int)substr($kolE, -2);
+											$price=odbc_result($cr_part, $price_periode);
+											//$price=$kolH;
+
+
+											// $golek_nomer=odbc_exec($koneksi_lp, "SELECT top 1 isnull(no_ctrl_bud,0) as no FROM bps_budinvest_dtl WHERE no_ctrl='$kolC' order by tgl_updt desc");
+											// $no_urut=odbc_result($golek_nomer, "no");
+											// if($no_urut==0){
+											// 	$no_ctrlbud=$kolC."-0001";
+											// }else{
+												// $split_no=explode("-", $no_urut);
+												// $nomer=((int)$split_no[4])+1;
+												// $no_ctrlbud=$kolC."-".substr("0000".$nomer,-4);
+											// }
+											// echo $kolC;
+										
+											$no_ctrlbud=$kolC."-".substr("0000".($i-7),-4);
+											if($kolJ!="")
+											{
+												$sql_updt="INSERT into bps_budinvest_dtl (no_ctrl,no_ctrl_bud,sect,periode,bud_group,part_no,part_nm,part_dtl,qty,
+												uom,price,curr,lp,pic_updt,tgl_updt,term)
+												values ('$kolC','$no_ctrlbud','$sect','$kolE','$kolF','$kolI','$part_nm',
+												'$part_dtl',$kolJ,'$uom','$price','$curr','$lp','$pic_updt', getdate(),
+												'$kolA')";
+												$hasil = odbc_exec($koneksi_lp, $sql_updt);
+												echo "<br>lht ".$i.$sql_updt;
+												if(!$hasil)
+												{
+													echo "<br>Error ".$i.$sql_updt." - ".$no_ctrlbud."<br>";
+													print(odbc_error());
+												}
+											
+											}
+										}
+										echo "<script>alert('Ada $baris_data baris. Data Berhasil di Upload '); 
+										window.location = '?page=22002'</script>";
+										unlink($_FILES['file']['name']);
+										
+									}
+									else{ echo "<script>alert('Format file harus XLS'); window.location = '?page=22002'</script>"; 
+								}
+							}
+							?>
+						</div>
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row clearfix">
+		<div class="col-lg-12 col-md-129 col-sm-12 col-xs-12">
+			<div class="card">
+				<div class="row clearfix">
+					<div class="header">
+						<h2>Record<small>Plan Part Budget Invest</small></h2>
+					</div>
+					<div class="body">
+						<form action="" id="frmcari" method="post"  enctype="multipart/form-data">
+							<div class="col-md-2">	
+								<div class="form-group">
+									<div class="input-group">
+										<select class="selectpicker" style="width: 50%;"  name="term_cr" id="term_cr"  required>
+											<option selected="selected" value="">---Pilih Term---</option>
+											<?php
+											$qterm="select distinct term from bps_setterm order by term desc";
+											$tb_qterm=odbc_exec($koneksi_lp,$qterm);
+											$opt_term="";
+											while($bar_qterm=odbc_fetch_array($tb_qterm)){
+												$term=odbc_result($tb_qterm,"term");
+												$opt_term=$opt_term.'<option value="'.$term.'">'.$term.'</option>';
+											}
+											echo $opt_term;
+											?>
+										</select>
+									</div>
+								</div>
+							</div>
+							<?php if(in_array("ADM_FA",$aryakses)){	
+							//if($user=='RMU'){ ?>
+								<div class="col-md-2">	
+									<div class="form-group">
+										<div class="input-group">
+											<select class="selectpicker" style="width: 100%;"  name="sect_cr" id="sect_cr" >
+												<option selected="selected" value="">---Pilih Section---</option>
+												<option value="all">Semua Section</option>
+												<?php
+												$qsect="select distinct sect from bps_budget_invest order by sect asc";
+												$tb_qsect=odbc_exec($koneksi_lp,$qsect);
+												$opt_sect="";
+												while($bar_qsect=odbc_fetch_array($tb_qsect)){
+													$sec=odbc_result($tb_qsect,"sect");
+													$opt_sect=$opt_sect.'<option value="'.$sec.'">'.$sec.'</option>';
+												}
+												echo $opt_sect;
+												?>
+											</select>
+										</div>
+									</div>
+								</div>
+							<?php } ?>
+							<div class="col-sm-2">	
+								<div class="form-group">
+									<div class="input-group">
+										<select class="selectpicker" style="width: 100%;"  name="cmd_cari" id="cmd_cari" >
+											<option selected="selected" value="">---Pilih Kolom---</option>
+											<option value="b.periode">Periode</option>
+											<option value="a.no_ctrl">No Control</option>
+											<option value="part_no">Part No</option>	
+											<option value="a.bud_group">Equipment Name</option>
+											<option value="order_plan">Order Plan</option>
+											<option value="del_plan">Delivery Plan</option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-sm-4">	
+								<div class="form-group">
+									<div class="form-line">
+										<input type="text"  class="form-control" data-role="tagsinput" id="txt_cari" name="txt_cari" placeholder="Detail Pencarian">
+									</div> 
+								</div>
+							</div>
+
+							<div class="col-sm-2">
+								<button type="submit" name="cr_b" id="cr_b" class="btn bg-purple btn-circle-lg waves-effect waves-circle waves-float"><i class="material-icons">search</i> </button>
+								<button type="reset" name="reset" id="reset" class="btn bg-red btn-circle-lg waves-effect waves-circle waves-float"><i class="material-icons">clear</i> </button>
+							</div>
+						</form>
+					</div>	
+				</div>	   
+				<div class="row clearfix">
+					<div class="body">
+						<div class="table-responsive">
+							<table id="example" class="table table-bordered table-striped table-hover dataTable js-exportable tabel2">
+								<thead>
+									<tr>
+										<th>Term</th>
+										<th>No Ctrl</th>
+										<th>No Ctrl Bud</th>
+										<th>Sect</th>
+										<th>Order Plan</th>
+										<th>Delivery Plan</th>
+										<th>Budget Group</th>
+										<th>Part No</th>
+										<th>Part Name</th>
+										<th>Part Detail</th>
+										<th>Qty</th>
+										<th>Uom</th>
+										<th>Price</th>
+										<th>Curr</th>
+										<th>Purchasing</th>
+									</tr>
+								</thead>
+
+								<tbody>
+									<?php
+									if(isset($_POST['cr_b']) ){
+										$term_cr=$_POST['term_cr'];
+										if(in_array("ADM_FA",$aryakses)){	//if($user=="RMU"){										
+											$sect_cr=$_POST['sect_cr'];
+											if($sect_cr=="all"){
+												$whr0="";//" and a.sect='$sect' ";
+											}else{
+												$whr0=" and a.sect='$sect_cr'";
+											}
+										}
+										else{
+											$whr0=" and a.sect='$sect' ";
+										}
+
+										$cmd_cari=$_POST['cmd_cari'];
+										$txt_cari=str_replace(" ","",$_POST['txt_cari']);
+
+										if($txt_cari==""){
+											$whr=""; 
+										}else{
+											$whr=" and replace($cmd_cari,' ','') like '%$txt_cari%'";
+										}										
+									}
+
+									if(isset($_POST['cr_b'])){
+										$sq_acc="
+										select a.term,a.no_ctrl,a.sect,sub_term,a.periode,a.cip_no,a.bud_group,a.qty,
+										a.price,order_plan,del_plan,carline,no_ctrl_bud,part_no,part_nm,part_dtl,
+										b.qty,b.price,b.curr,b.uom,lp
+										from bps_budget_invest a inner join bps_budinvest_dtl b on a.no_ctrl=b.no_ctrl
+										where a.term='$term_cr' and a.no_ctrl is not null $whr0 $whr order by periode asc";
+										 echo $sq_acc;
+										$tb_acc=odbc_exec($koneksi_lp,$sq_acc);
+										$row=0;
+										while($baris1=odbc_fetch_array($tb_acc)){
+											$row++;
+											?>
+											<tr onclick="javascript:pilih(this);">
+												<td><?php echo  $baris1["term"]; ?></td>
+												<td><?php echo  $baris1["no_ctrl"]; ?></td>
+												<td><?php echo  $baris1["no_ctrl_bud"]; ?></td>
+												<td><?php echo  $baris1["sect"]; ?></td>
+												<td><?php echo  $baris1["order_plan"]; ?></td>
+												<td><?php echo  $baris1["del_plan"]; ?></td>
+												<td><?php echo  $baris1["bud_group"]; ?></td>
+												<td><?php echo  $baris1["part_no"]; ?></td>
+												<td><?php echo  $baris1["part_nm"]; ?></td>
+												<td><?php echo  $baris1["part_dtl"]; ?></td>
+												<td><?php echo  $baris1["qty"]; ?></td>
+												<td><?php echo  $baris1["uom"]; ?></td>
+												<td><?php echo  round($baris1["price"]); ?></td>
+												<td><?php echo  $baris1["curr"]; ?></td>
+												<td><?php echo  $baris1["lp"]; ?></td>
+											</tr>	
+											<?php 
+										}
+									}
+									?>	
+								</tbody>
+								<tfoot>
+									<tr>	
+									</tr>
+								</tfoot>
+							</table>
+							<?php if(isset($_POST['cr_b'])){ ?>
+								<button type="button" class="btn bg-purple waves-effect" onclick="open_child('Exp_xls/exp_part_invest.php?t=<?php echo $term_cr;?>&s=<?php echo $sect;?>','800','500'); return false;">
+									<i class="material-icons">file_download</i>
+									<span>Download</span>
+								</button>	
+							<?php } ?>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</section>
+
+<script type="text/javascript">
+	$(document).ready(function()
+	{
+		$('.del_plan').bootstrapMaterialDatePicker({
+			format: 'YYYYMM', Date : new Date(),
+			clearButton: true,
+			weekStart: 0,
+			time: false
+		});	
+		$('.periodeflex').bootstrapMaterialDatePicker({
+			format: 'YYYYMM',
+			clearButton: true,
+			weekStart: 0,
+			time: false
+		});	
+	});
+</script>	
+<script>
+	function pilih(row){
+		var kd_pel0=row.cells[0].innerHTML;
+		var kd_pel1=row.cells[1].innerHTML;
+		var kd_pel2=row.cells[2].innerHTML;
+		var kd_pel3=row.cells[3].innerHTML;
+		var kd_pel4=row.cells[4].innerHTML;
+		var kd_pel5=row.cells[5].innerHTML;
+		var kd_pel6=row.cells[6].innerHTML;
+		var kd_pel7=row.cells[7].innerHTML;
+		var kd_pel8=row.cells[8].innerHTML;
+		var kd_pel9=row.cells[9].innerHTML;
+		var kd_pel10=row.cells[10].innerHTML;
+		var kd_pel11=row.cells[11].innerHTML;
+		var kd_pel12=row.cells[12].innerHTML;
+		var kd_pel13=row.cells[13].innerHTML;
+		var kd_pel14=row.cells[14].innerHTML;
+
+		document.form1.term.value=kd_pel0;
+		document.form1.no_ctrl_g.value=kd_pel1;
+		document.form1.no_ctrl_p.value=kd_pel2;
+		document.form1.sect.value=kd_pel3;
+		document.form1.order_plan.value=kd_pel4;
+		document.form1.del_plan.value=kd_pel5;
+		document.form1.equipment.value=kd_pel6;
+		document.form1.part_no.value=kd_pel7;
+		document.form1.part_nm.value=kd_pel8;
+		document.form1.part_dtl.value=kd_pel9;
+		document.form1.qty.value=kd_pel10;
+		document.form1.uom.value=kd_pel11;
+		document.form1.price.value=kd_pel12;
+		document.form1.curr.value=kd_pel13;
+		document.form1.lp.value=kd_pel14;
+	}
+</script>

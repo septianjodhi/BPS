@@ -1,0 +1,56 @@
+ <div class="card">
+   <div class="container-fluid">
+     <?php
+     $nmobj=$_GET['o'];
+     // $nmcar=$_GET['c'];
+     $kol=$_GET['k'];
+     $nomor=$_GET['nomor']-1;
+     $sql1="select * from lp_cv order by cost_center_code";
+
+     ?>
+
+     <form id="form1" name="form1" method="post">
+      <div class="block-header"><h2>Cari COST Center(AREA)</h2>  </div>
+      <table id="example" class="table table-bordered table-striped table-hover dataTable js-exportable tabel2">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>CC CODE</th>
+            <th>MAKER CODE</th>
+            <th>CARLINE</th>
+            <th>CV</th>
+            <th>CV DESCRIPTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!--        data ini bisa di loop dari database-->
+          <?php
+          $tb_area=odbc_exec($koneksi_lp,$sql1);
+          $row=0;
+          while($baris1=odbc_fetch_array($tb_area)){ $row++;
+            ?>
+            <tr onclick="javascript:pilih(this);">
+             <td><?php echo $row; ?></td>
+             <input type="hidden" name="nom" id="nom" value="<?php echo $nomor;?>" class="input-medium">
+             <td><?php echo odbc_result($tb_area,"COST_CENTER_CODE");?></td>
+             <td><?php echo odbc_result($tb_area,"CARMAKER");?></td>	
+             <td><?php echo odbc_result($tb_area,"CARLINE");?></td>	
+             <td><?php echo odbc_result($tb_area,"CV_CODE");?></td>
+             <td><?php echo odbc_result($tb_area,"CV_DESC");?></td>
+           </tr>
+         <?php } ?>    	
+       </tbody>
+     </table>
+   </form>
+ </div>
+</div>
+
+<script>
+  function pilih(row){
+    var kd_pel=row.cells[4].innerHTML; 
+    var kd_pel3=row.cells[3].innerHTML;   
+    window.opener.parent.document.getElementById("cccode").value = kd_pel;
+    window.opener.parent.document.getElementById("carline").value = kd_pel3;
+    window.close();
+  }
+</script>
